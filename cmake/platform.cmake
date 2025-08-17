@@ -1,0 +1,42 @@
+macro(detect_platform)
+    if (UNIX AND NOT APPLE)
+        message(STATUS "Detected linux platform")
+        set(ATLAS_PLATFORM "linux")
+    elseif(WIN32)
+        message(STATUS "Detected win32 platform")
+        set(ATLAS_PLATFORM "win32")
+    else()
+        message(FATAL_ERROR "Unsupported platform")
+    endif()
+endmacro(detect_platform)
+
+macro(set_linux_defines)
+    message(STATUS "Configuring linux platform defines")
+
+    add_definitions(-DATLAS_LINUX)
+    add_definitions(-D_GNU_SOURCE)
+    add_definitions(-DNDEBUG)
+
+endmacro(set_linux_defines)
+
+macro(set_win32_defines)
+    message(STATUS "Configuring win32 platform defines")
+
+    add_definitions(-DATLAS_WIN32)
+    add_definitions(-DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00)
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
+    add_definitions(-DNOMINMAX)
+    add_definitions(-DUNICODE)
+    add_definitions(-DNDEBUG)
+
+endmacro(set_win32_defines)
+
+macro(set_platform_defines)
+    if (${ATLAS_PLATFORM} STREQUAL "linux")
+        set_linux_defines()
+    elseif (${ATLAS_PLATFORM} STREQUAL "win32")
+        set_win32_defines()
+    else()
+        message(FATAL_ERROR "Unknown platform")
+    endif()
+endmacro(set_platform_defines)

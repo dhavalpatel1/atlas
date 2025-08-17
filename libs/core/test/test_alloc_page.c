@@ -1,0 +1,23 @@
+#include "core_alloc.h"
+
+#include "anvil_spec.h"
+
+spec(alloc_page) {
+
+    it("ensures alignment of allocation matches page-size") {
+        const usize pageSize = alloc_min_size(g_alloc_page);
+
+        Mem alloc = alloc_alloc(g_alloc_page, 8, 2);
+        anvil_eq_int(((uptr)alloc.ptr & (pageSize - 1)), 0);
+
+        alloc_free(g_alloc_page, alloc);
+    }
+
+    it("can allocate memory smaller then the page-size") {
+        const Mem alloc = alloc_alloc(g_alloc_page, 64, 8);
+
+        anvil_eq_int(alloc.size, 64);
+
+        alloc_free(g_alloc_page, alloc);
+    }
+}

@@ -1,0 +1,31 @@
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+
+#Build output
+/[Bb]uild*
+
+# User settings (Except portable common settings).
+/.vscode/*
+
+# Ide caches.
+/.clangd/index/*
+/.cache/
+
+# 10x Editor
+*.10x
+10x_initial_cache.cmake
+cmake_build.json
+
+# Claude
+/.claude/*
+CLAUDE.md

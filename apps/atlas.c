@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+#include "core_diag.h"
+#include "core_init.h"
+#include "core_string.h"
+#include "core_thread.h"
+
+static void test_thread(void* data) {
+    (void)data;
+    diag_print("Hello from executor! (tid: {}, name: {})\n", fmt_int(g_thread_tid), fmt_text(g_thread_name));
+}
+
+int main() {
+    core_init();
+
+    diag_print("Hello from main! (pid: {}, tid: {}, cpus: {}, name: {})\n", fmt_int(g_thread_pid), fmt_int(g_thread_tid), fmt_int(g_thread_core_count), fmt_text(g_thread_name));
+
+    ThreadHandle exec = thread_start(test_thread, null, string_lit("atlas_executor"));
+    thread_join(exec);
+
+    core_teardown();
+    return 0;
+}

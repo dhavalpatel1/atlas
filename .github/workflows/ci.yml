@@ -1,0 +1,198 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    name: Build and Test (${{ matrix.os }}, ${{ matrix.compiler }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux builds
+          - os: ubuntu-22.04
+            compiler: gcc
+            cc: gcc-11
+            cxx: g++-11
+          - os: ubuntu-22.04
+            compiler: clang
+            cc: clang-15
+            cxx: clang++-15
+          # Windows builds
+          - os: windows-2022
+            compiler: msvc
+            cc: cl
+            cxx: cl
+          - os: windows-2022
+            compiler: clang
+            cc: clang
+            cxx: clang++
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ runner.os }}-${{ matrix.compiler }}-build-${{ hashFiles('**/CMakeLists.txt','**/*.h','**/*.c') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.compiler }}-build-
+
+      # Linux dependencies
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          if [ "${{ matrix.compiler }}" == "gcc" ]; then
+            sudo apt-get install -y gcc-11 g++-11
+          else
+            sudo apt-get install -y clang-15 clang++-15
+          fi
+
+      # Windows Clang setup using dedicated action
+      - name: Install LLVM and Clang (Windows)
+        if: runner.os == 'Windows' && matrix.compiler == 'clang'
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "17.0"
+          directory: ${{ runner.temp }}/llvm
+
+      # Windows MSVC setup
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows' && matrix.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # Configure CMake with proper compiler paths
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=${{ matrix.cc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Configure CMake (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.compiler == 'msvc'
+        run: |
+          cmake -B build -S . `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        shell: powershell
+
+      - name: Configure CMake (Windows Clang)
+        if: runner.os == 'Windows' && matrix.compiler == 'clang'
+        run: |
+          cmake -B build -S . `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER="${{ runner.temp }}/llvm/bin/clang.exe" `
+            -DCMAKE_CXX_COMPILER="${{ runner.temp }}/llvm/bin/clang++.exe" `
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        shell: powershell
+
+      - name: Build project
+        run: |
+          cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: |
+          cmake --build build --target test --config Release
+
+      - name: Upload build artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            build/CMakeFiles/CMakeOutput.log
+            build/CMakeFiles/CMakeError.log
+            build/compile_commands.json
+          retention-days: 7
+
+  memory-safety:
+    name: Memory Safety (Sanitizers)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-15 clang++-15
+
+      - name: Configure with sanitizers
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-15 \
+            -DCMAKE_CXX_COMPILER=clang++-15 \
+            -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+
+      - name: Build with sanitizers
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Run tests with sanitizers
+        run: cmake --build build --target test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: abort_on_error=1
+
+  documentation:
+    name: Generate Documentation
+    runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    outputs:
+      docs-changed: ${{ steps.doc-changes.outputs.changed_files != '' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine if documentation changed
+        id: doc-changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(c|h)$|Doxyfile' || true)
+          echo "changed_files=$CHANGED" >> $GITHUB_OUTPUT
+          echo "Documentation files changed: $CHANGED"
+
+      - name: Install Doxygen and Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Generate documentation
+        run: doxygen Doxyfile
+
+      - name: Upload documentation artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: html/
+
+  deploy-docs:
+    name: Deploy Docs to GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: documentation
+    runs-on: ubuntu-22.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
