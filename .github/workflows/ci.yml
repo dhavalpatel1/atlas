@@ -154,7 +154,7 @@ jobs:
       pages: write
       id-token: write
     outputs:
-      docs-changed: ${{ steps.doc-changes.outputs.changed_files != '' }}
+      docs-changed: ${{ steps.doc-changes.outputs.changed_files == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -165,8 +165,13 @@ jobs:
         id: doc-changes
         run: |
           CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(c|h)$|Doxyfile' || true)
-          echo "changed_files=$CHANGED" >> $GITHUB_OUTPUT
-          echo "Documentation files changed: $CHANGED"
+          if [ -n "$CHANGED" ]; then
+            echo "changed_files=true" >> $GITHUB_OUTPUT
+            echo "Documentation files changed: $CHANGED"
+          else
+            echo "changed_files=false" >> $GITHUB_OUTPUT
+            echo "No documentation files changed"
+          fi
 
       - name: Install Doxygen and Graphviz
         run: |
