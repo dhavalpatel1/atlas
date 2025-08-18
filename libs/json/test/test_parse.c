@@ -148,7 +148,7 @@ spec(parse) {
             {string_lit("\"\\U0026\""), string_lit("&")},
             {string_lit("\"\\u039B\""), string_lit("Î›")},
             {string_lit("\"\\u0E3F\""), string_lit("à¸¿")},
-            {string_lit("\"\\u1D459\""), string_lit("í µí±™")},
+            {string_lit("\"\\u1D459\""), string_lit("ğ‘™")},
             {string_lit("\"\\u41\""), string_lit("A")},
             {string_lit("\"\\u0041\""), string_lit("A")},
             {string_lit("\"\\ug\""), string_lit("\0g")},
