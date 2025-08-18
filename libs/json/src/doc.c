@@ -1,44 +1,98 @@
+/**
+ * @file doc.c
+ * @brief JSON document implementation
+ *
+ * Implements the core JSON document structure for storing and managing JSON values.
+ * Provides value creation, relationship management, and property access functions
+ * for all JSON types including objects, arrays, and primitives.
+ */
+
 #include "core_alloc.h"
 #include "core_diag.h"
 #include "core_dynarray.h"
 
 #include "json_doc.h"
 
+/**
+ * @brief Internal data structure for JSON arrays
+ * 
+ * Stores array metadata including linked list pointers for efficient
+ * element traversal and count tracking for O(1) size queries.
+ */
 typedef struct {
-    JsonVal elemHead;
-    JsonVal elemTail;
-    u32 elemCount;
+    JsonVal elemHead;   /**< Handle to first array element */
+    JsonVal elemTail;   /**< Handle to last array element */
+    u32 elemCount;      /**< Number of elements in the array */
 } JsonArrayData;
 
+/**
+ * @brief Internal data structure for JSON objects
+ * 
+ * Stores object metadata including the head of the field linked list
+ * and count tracking for O(1) field count queries.
+ */
 typedef struct {
-    JsonVal fieldHead;
-    u32 fieldCount;
+    JsonVal fieldHead;  /**< Handle to first object field (name-value pair) */
+    u32 fieldCount;     /**< Number of fields in the object */
 } JsonObjectData;
 
+/**
+ * @brief Internal data structure for all JSON values
+ * 
+ * Unified value representation that stores type information, parent relationship,
+ * linking data for collections, and the actual value data in a discriminated union.
+ * The typeAndParent field packs both JsonType (lower 16 bits) and JsonParent 
+ * (upper 16 bits) for efficient storage.
+ */
 typedef struct {
-    u32 typeAndParent;
-    JsonVal next;
+    u32 typeAndParent;      /**< Packed type (bits 0-15) and parent type (bits 16-31) */
+    JsonVal next;           /**< Next sibling in parent collection (array/object) */
 
     union {
-        JsonArrayData val_array;
-        JsonObjectData val_object;
-        String val_string;
-        f64 val_number;
-        bool val_bool;
+        JsonArrayData val_array;    /**< Array data (when type is JsonType_Array) */
+        JsonObjectData val_object;  /**< Object data (when type is JsonType_Object) */
+        String val_string;          /**< String value (when type is JsonType_String) */
+        f64 val_number;             /**< Numeric value (when type is JsonType_Number) */
+        bool val_bool;              /**< Boolean value (when type is JsonType_Bool) */
     };
 } JsonValData;
 
+/**
+ * @brief Main JSON document structure
+ * 
+ * Contains the complete JSON document state including all values stored
+ * in a dynamic array for efficient access by handle, and the allocator
+ * used for memory management of strings and the document itself.
+ */
 struct sJsonDoc {
-    DynArray values;
-    Allocator* alloc;
+    DynArray values;    /**< Dynamic array storing all JsonValData structures */
+    Allocator* alloc;   /**< Allocator for string storage and document memory */
 };
 
+/**
+ * @brief Get the internal data structure for a JSON value
+ * @param doc JSON document containing the value
+ * @param val JSON value handle
+ * @return Pointer to the internal value data structure
+ *
+ * Provides access to the underlying value data with bounds checking.
+ * Used internally to access value properties and content.
+ */
 static JsonValData* json_val_data(const JsonDoc* doc, const JsonVal val) {
     diag_assert_msg(val < doc->values.size, "Out of bounds JsonVal");
 
     return dynarray_at_t(&doc->values, val, JsonValData);
 }
 
+/**
+ * @brief Add a new value data structure to the document
+ * @param doc JSON document to add the value to
+ * @param data Value data structure to add
+ * @return JSON value handle for the newly added value
+ *
+ * Allocates a new value slot in the document and returns a handle
+ * that can be used to reference the value later.
+ */
 static JsonVal json_add_data(JsonDoc* doc, JsonValData data) {
     const JsonVal val = (JsonVal)doc->values.size;
     *dynarray_push_t(&doc->values, JsonValData) = data;

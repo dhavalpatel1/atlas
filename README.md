@@ -30,6 +30,14 @@ Atlas consists of several core modules:
 - **Validation**: Input validation and error handling
 - **Help Generation**: Automatic help text generation
 
+### JSON Library (`libs/json`)
+- **RFC 7159 Compliance**: Full JSON specification support
+- **Document Management**: Create, manipulate, and query JSON documents
+- **Parsing**: Convert JSON text to structured data with detailed error reporting
+- **Serialization**: Write JSON with compact or pretty-printed formatting
+- **Deep Equality**: Compare JSON values with proper semantic equality
+- **Unicode Support**: Full UTF-8 string handling with escape sequences
+
 ## Requirements
 
 - CMake 3.15 or higher
@@ -66,6 +74,7 @@ cmake --build build --target test.core
 cmake --build build --target test.anvil
 cmake --build build --target test.cli
 cmake --build build --target test.jobs
+cmake --build build --target test.json
 ```
 
 ## Project Structure
@@ -74,6 +83,7 @@ cmake --build build --target test.jobs
 - `libs/jobs/` - Task scheduling and parallel execution system
 - `libs/anvil/` - BDD-style testing framework
 - `libs/cli/` - Command-line argument processing
+- `libs/json/` - RFC 7159 compliant JSON parsing and serialization library
 - `apps/` - Example applications demonstrating library usage
 - `cmake/` - Build system configuration and platform detection
 

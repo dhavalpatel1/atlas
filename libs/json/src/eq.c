@@ -1,7 +1,23 @@
+/**
+ * @file eq.c
+ * @brief JSON value equality comparison implementation
+ *
+ * Implements deep equality comparison for JSON values following JSON semantics.
+ * Handles recursive comparison of nested structures (arrays and objects) and
+ * proper type-aware comparison for primitive values.
+ */
+
 #include "core_diag.h"
 
 #include "json_eq.h"
 
+/**
+ * @brief Compare two JSON arrays for equality
+ * @param doc JSON document containing both arrays
+ * @param x First array to compare
+ * @param y Second array to compare
+ * @return true if arrays have equal length and all elements are equal
+ */
 static bool json_eq_array(JsonDoc* doc, JsonVal x, JsonVal y) {
     const usize count = json_elem_count(doc, x);
     if (count != json_elem_count(doc, y)) {
@@ -26,6 +42,16 @@ static bool json_eq_array(JsonDoc* doc, JsonVal x, JsonVal y) {
     return true;
 }
 
+/**
+ * @brief Compare two JSON objects for equality
+ * @param doc JSON document containing both objects
+ * @param x First object to compare
+ * @param y Second object to compare
+ * @return true if objects have the same fields with equal values
+ *
+ * Performs field-by-field comparison ensuring both objects have the same
+ * set of field names and all corresponding values are equal.
+ */
 static bool json_eq_object(JsonDoc* doc, JsonVal x, JsonVal y) {
     const usize count = json_field_count(doc, x);
     if (count != json_field_count(doc, y)) {
