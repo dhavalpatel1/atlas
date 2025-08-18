@@ -31,6 +31,7 @@ typedef enum {
     FileResult_PathTooLong,           /**< Path exceeds maximum length */
     FileResult_PathInvalid,           /**< Path contains invalid characters */
     FileResult_TooManyOpenFiles,      /**< Too many files open */
+    FileResult_IsDirectory,           /**< Operation attempted on a directory */
     FileResult_UnknownError,          /**< Unknown or unspecified error */
 
     FileResult_Count,                 /**< Number of result codes */

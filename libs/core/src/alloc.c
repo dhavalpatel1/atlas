@@ -16,6 +16,9 @@
 #include "core_string.h"
 #include "init_internal.h"
 
+/** @brief Maximum allowed allocation size (128 MiB) to prevent excessive memory usage */
+#define alloc_max_alloc_size (usize_mebibyte * 128)
+
 /** @brief Global heap allocator instance for general-purpose memory allocation. */
 Allocator* g_alloc_heap;
 
@@ -72,9 +75,13 @@ void alloc_teardown_thread() {
  */
 FORCE_INLINE Mem alloc_alloc(Allocator* allocator, const usize size, const usize align) {
     diag_assert_msg(allocator, "alloc_alloc(): Allocator is not initialized!");
-	diag_assert_msg(size, "alloc_alloc(): 0 byte allocations are not valid");
-	diag_assert_msg(bits_ispow2(align), "alloc_alloc(): Alignment '{}' is not a power of two", fmt_int(align));
-	diag_assert_msg((size & (align - 1)) == 0, "alloc_alloc(): Size '{}' is not a multiple of the alignment '{}'", fmt_int(size), fmt_int(align));
+    diag_assert_msg(size, "alloc_alloc(): 0 byte allocations are not valid");
+
+    diag_assert_msg(bits_ispow2(align), "alloc_alloc(): Alignment '{}' is not a power of two", fmt_int(align));
+
+    diag_assert_msg((size & (align - 1)) == 0, "alloc_alloc(): Size '{}' is not a multiple of the alignment '{}'", fmt_size(size), fmt_int(align));
+
+    diag_assert_msg(size < alloc_max_alloc_size, "alloc_alloc(): Size '{}' is bigger then the maximum of '{}'", fmt_size(size), fmt_size(alloc_max_alloc_size));
 
     return allocator->alloc(allocator, size, align);
 }

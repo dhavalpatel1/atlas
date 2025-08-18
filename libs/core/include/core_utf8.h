@@ -10,7 +10,12 @@
 
 #pragma once 
 
-#include "core_string.h"
+#include "core_dynstring.h"
+
+/**
+ * @brief Type representing a Unicode code point value
+ */
+typedef u32 Utf8Codepoint;
 
 /**
  * @brief Check if a byte is a UTF-8 continuation byte
@@ -25,3 +30,19 @@ bool utf8_contchar(u8 byte);
  * @return Number of Unicode code points (characters) in the string
  */
 usize utf8_cp_count(String text);
+
+/**
+ * @brief Calculate the number of bytes needed to encode a UTF-8 code point
+ * @param cp The Unicode code point to encode
+ * @return Number of bytes required (1-4) for UTF-8 encoding
+ */
+usize utf8_cp_bytes(Utf8Codepoint cp);
+
+/**
+ * @brief Write a Unicode code point to a dynamic string as UTF-8
+ * @param str Dynamic string to append the UTF-8 bytes to
+ * @param cp Unicode code point to encode and append
+ * 
+ * If the code point is invalid, writes the UTF-8 replacement character (U+FFFD).
+ */
+void utf8_cp_write(DynString* str, Utf8Codepoint cp);

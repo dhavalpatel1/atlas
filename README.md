@@ -30,23 +30,60 @@ Atlas consists of several core modules:
 - **Validation**: Input validation and error handling
 - **Help Generation**: Automatic help text generation
 
+## Requirements
+
+- CMake 3.15 or higher
+- C11-compatible compiler (GCC, Clang, or MSVC)
+- Git for version control
+
 ## Building
 
-The project uses CMake and supports multiple compilers:
+The project uses CMake with automatic platform and compiler detection:
 
 ```bash
+# Configure the build
 cmake -B build -S .
+
+# Build the project
 cmake --build build --config Release
 ```
 
+The build system automatically:
+- Detects your platform (Linux/Windows) and compiler (GCC/Clang/MSVC)
+- Configures appropriate compile flags and warnings
+- Enables sanitizers on Clang/Linux builds for debugging
+
 ## Testing
 
-Run the test suite:
-
+Run all tests:
 ```bash
 cmake --build build --target test
 ```
 
+Run individual library tests:
+```bash
+cmake --build build --target test.core
+cmake --build build --target test.anvil
+cmake --build build --target test.cli
+cmake --build build --target test.jobs
+```
+
+## Project Structure
+
+- `libs/core/` - Foundation library with memory management and system abstractions
+- `libs/jobs/` - Task scheduling and parallel execution system
+- `libs/anvil/` - BDD-style testing framework
+- `libs/cli/` - Command-line argument processing
+- `apps/` - Example applications demonstrating library usage
+- `cmake/` - Build system configuration and platform detection
+
 ## Documentation
 
-This documentation is generated using Doxygen and provides comprehensive API reference for all modules.
+API documentation is generated using Doxygen. The project follows Doxygen commenting conventions with public API documented in header files and implementation details in source files.
+
+## Contributing
+
+Please ensure all tests pass before submitting changes:
+```bash
+cmake --build build --target test
+```

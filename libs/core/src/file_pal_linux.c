@@ -77,6 +77,10 @@ static FileResult fileresult_from_errno() {
         case EINVAL: {
             return FileResult_InvalidFilename;
         }
+
+        case EISDIR: {
+            return FileResult_IsDirectory;
+        }
     }
 
     return FileResult_UnknownError;

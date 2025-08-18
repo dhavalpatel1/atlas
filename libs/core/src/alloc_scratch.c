@@ -17,11 +17,11 @@
 #include "core_memory.h"
 #include "core_types.h"
 
-/** @brief Size of the scratch allocator's backing memory buffer (2 MiB). */
-#define alloc_scratch_heap_size (usize_mebibyte * 2)
+/** @brief Size of the scratch allocator's backing memory buffer (4 MiB). */
+#define alloc_scratch_heap_size (usize_mebibyte * 4)
 
-/** @brief Maximum size for a single scratch allocation (8 KiB). */
-#define alloc_scratch_max_alloc_size (usize_kibibyte * 8)
+/** @brief Maximum size for a single scratch allocation (64 KiB). */
+#define alloc_scratch_max_alloc_size (usize_kibibyte * 64)
 
 /** @brief Size of guard regions for corruption detection (8 KiB). */
 #define alloc_scratch_guard_size (usize_kibibyte * 8)
