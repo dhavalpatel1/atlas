@@ -235,6 +235,7 @@ FinishedLabel:
  * @param source Source location where the error occurred
  */
 void anvil_report_error(AnvilTestContext* ctx, String msg, const SourceLoc source) {
+    diag_break();
     anvil_result_error(ctx->result, msg, source);
 }
 

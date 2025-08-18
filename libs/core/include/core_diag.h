@@ -92,6 +92,11 @@ void diag_print_err_raw(String msg);
 void diag_assert_report_fail(String msg, SourceLoc loc);
 
 /**
+ * @brief Trigger a debugger breakpoint for debugging purposes
+ */
+void diag_break();
+
+/**
  * @brief Immediately crash the program without a message
  */
 NORETURN void diag_crash();

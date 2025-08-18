@@ -44,17 +44,6 @@
     #define OPTIMIZE_OFF()
 #endif
 
-/**
- * @brief Trigger a debugger breakpoint or trap
- */
-#if defined(ATLAS_LINUX)
-    #define DEBUG_BREAK() __builtin_trap()
-#elif defined(ATLAS_WIN32)
-    #define DEBUG_BREAK() __debugbreak()
-#else
-    #define DEBUG_BREAK()
-#endif
-
 /** @brief Mark a function as never returning */
 #define NORETURN _Noreturn
 
