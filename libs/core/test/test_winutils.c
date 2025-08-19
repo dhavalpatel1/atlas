@@ -13,7 +13,7 @@ spec(winutils) {
             "⎳aⁱ-bⁱ⎟⎥⎪▁▂▃▄▅▆▇█∀∂∈ℝ∧∪≡∞");
 
         const usize wideCharsSize = winutils_to_widestr_size(testStr);
-        anvil_eq_int(wideCharsSize, 368 + 1); // +1 for null-terminator.
+        anvil_eq_int(wideCharsSize, 368 + sizeof(wchar_t));
 
         Mem         wideChars     = mem_stack(wideCharsSize);
         const usize wideCharCount = winutils_to_widestr(wideChars, testStr);
