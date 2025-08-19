@@ -2,21 +2,56 @@
 
 #include "anvil_spec.h"
 
-spec(file) {
-    it("can read an write file contents") {
-        Allocator* alloc = alloc_bump_create_stack(256);
+static void test_file_write_data(DynString* str, usize size) {
+    for (usize i = 0; i != size; ++i) {
+        dynstring_append_char(str, i % 255);
+    }
+}
 
-        File* file;
-        anvil_eq_int(file_temp(alloc, &file), FileResult_Success);
+static void test_file_verify_data(AnvilTestContext* _testCtx, String input) {
+    for (usize i = 0; i != input.size; ++i) {
+        anvil_eq_int(*string_at(input, i), i % 255);
+    }
+}
+
+spec(file) {
+
+    File*     file   = null;
+    DynString buffer = {0};
+
+    setup() {
+        file_temp(g_alloc_heap, &file);
+        buffer = dynstring_create(g_alloc_page, usize_kibibyte * 4);
+    }
+
+    it("can read-back content that was written") {
+
         anvil_eq_int(file_write_sync(file, string_lit("Hello World!")), FileResult_Success);
         anvil_eq_int(file_seek_sync(file, 0), FileResult_Success);
 
-        DynString str = dynstring_create(alloc, 64);
+        anvil_eq_int(file_read_sync(file, &buffer), FileResult_Success);
+        anvil_eq_string(dynstring_view(&buffer), string_lit("Hello World!"));
+    }
 
-        anvil_eq_int(file_read_sync(file, &str), FileResult_Success);
-        anvil_eq_string(dynstring_view(&str), string_lit("Hello World!"));
+    it("can read a file to the end") {
+        const usize testDataSize = 2345;
 
-        dynstring_destroy(&str);
+        // Write test data to the file.
+        test_file_write_data(&buffer, testDataSize);
+        anvil_eq_int(file_write_sync(file, dynstring_view(&buffer)), FileResult_Success);
+        anvil_eq_int(file_seek_sync(file, 0), FileResult_Success);
+
+        // Read the file to the end.
+        dynstring_clear(&buffer);
+        anvil_eq_int(file_read_to_end_sync(file, &buffer), FileResult_Success);
+
+        // Verify that all data was retrieved.
+        anvil_eq_int(buffer.size, testDataSize);
+        test_file_verify_data(_testCtx, dynstring_view(&buffer));
+    }
+
+    teardown() {
         file_destroy(file);
+        dynstring_destroy(&buffer);
     }
 }

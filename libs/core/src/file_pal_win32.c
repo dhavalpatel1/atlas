@@ -168,7 +168,7 @@ FileResult file_create(Allocator* alloc, String path, FileMode mode, FileAccessF
 }
 
 FileResult file_temp(Allocator *allocator, File **file) {
-    Mem tempDirPath = mem_stack(MAX_PATH * sizeof(wchar_t) + 1);
+    Mem tempDirPath = mem_stack((MAX_PATH + 1) * sizeof(wchar_t));
     const DWORD tempDirChars = GetTempPath(MAX_PATH, (wchar_t*)tempDirPath.ptr);
     if (!tempDirChars) {
         return fileresult_from_lasterror();

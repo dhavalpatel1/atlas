@@ -109,6 +109,8 @@ FileResult file_write_sync(File* file, String data);
  */
 FileResult file_read_sync(File* file, DynString* outData);
 
+FileResult file_read_to_end_sync(File* file, DynString* outData);
+
 /**
  * @brief Seek to a specific position in a file
  * @param file File handle to seek in

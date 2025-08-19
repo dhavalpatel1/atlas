@@ -58,3 +58,10 @@ String file_result_str(FileResult result) {
 void file_init() {
     file_pal_init();
 }
+
+FileResult file_read_to_end_sync(File* file, DynString* outData) {
+    FileResult res;
+    while ((res = file_read_sync(file, outData)) == FileResult_Success);
+
+    return res == FileResult_NoDataAvailable ? FileResult_Success : res;
+}
