@@ -40,13 +40,13 @@ typedef struct {
 } FileMapping;
 
 /** @brief Standard input file handle */
-File* g_file_stdin = &(File){ .handle = 0, access = FileAccess_Read };
+File* g_file_stdin = &(File){ .handle = 0, .access = FileAccess_Read };
 
 /** @brief Standard output file handle */
-File* g_file_stdout = &(File){ .handle = 1, access = FileAccess_Write };
+File* g_file_stdout = &(File){ .handle = 1, .access = FileAccess_Write };
 
 /** @brief Standard error file handle */
-File* g_file_stderr = &(File){ .handle = 2, access = FileAccess_Write };
+File* g_file_stderr = &(File){ .handle = 2, .access = FileAccess_Write };
 
 /**
  * @brief Convert Linux errno values to cross-platform FileResult codes
