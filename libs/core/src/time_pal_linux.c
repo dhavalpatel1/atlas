@@ -25,7 +25,7 @@ TimeReal time_pal_real_clock() {
         diag_crash_msg("clock_gettime(CLOCK_REALTIME) failed: {}", fmt_int(res));
     }
 
-    return ts.tv_sec * i64_lit(1000000) + ts.tv_nsec / i64_lit(1000);
+    return time_pal_native_to_real(ts);
 }
 
 TimeZone time_pal_zone_current() {
@@ -35,4 +35,16 @@ TimeZone time_pal_zone_current() {
     const time_t timezoneOffsetMinutes = timezoneOffsetSeconds / 60;
 
     return (TimeZone)timezoneOffsetMinutes;
+}
+
+/**
+ * @brief Convert Linux timespec to cross-platform TimeReal format
+ * @param ts Linux timespec structure containing seconds and nanoseconds
+ * @return Time in microseconds since Unix epoch
+ * 
+ * Converts Linux timespec structure to microseconds since Unix epoch.
+ * The conversion formula is: (seconds * 1,000,000) + (nanoseconds / 1,000)
+ */
+TimeReal time_pal_native_to_real(struct timespec ts) {
+    return ts.tv_sec * i64_lit(1000000) + ts.tv_nsec / i64_lit(1000);
 }

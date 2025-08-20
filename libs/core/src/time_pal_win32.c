@@ -23,27 +23,6 @@
 /** @brief Cached frequency of the Windows performance counter */
 static i64 g_perfCounterFrequency;
 
-/**
- * @brief Convert Windows FILETIME to microseconds since Unix epoch
- *
- * Windows FILETIME represents time as 100-nanosecond intervals since
- * January 1, 1601. This function converts it to microseconds since
- * the Unix epoch (January 1, 1970).
- *
- * @param filetime Pointer to Windows FILETIME structure
- * @return Time in microseconds since Unix epoch
- */
-static TimeReal time_pal_filetime_to_microsinceepoch(const FILETIME* filetime) {
-    const i64 winEpochToUnixEpoch = i64_lit(116444736000000000);
-    const i64 winTickToMicro = i64_lit(10);
-
-    LARGE_INTEGER winTicks;
-    winTicks.LowPart = filetime->dwLowDateTime;
-    winTicks.HighPart = filetime->dwHighDateTime;
-
-    return (winTicks.QuadPart - winEpochToUnixEpoch) / winTickToMicro;
-}
-
 void time_pal_init() {
     LARGE_INTEGER freq;
     if (LIKELY(QueryPerformanceFrequency(&freq))) {
@@ -68,7 +47,7 @@ TimeReal time_pal_real_clock() {
     FILETIME filetime;
     GetSystemTimePreciseAsFileTime(&filetime);
 
-    return time_pal_filetime_to_microsinceepoch(&filetime);
+    return time_pal_native_to_real(&filetime);
 }
 
 TimeZone time_pal_zone_current() {
@@ -90,4 +69,26 @@ TimeZone time_pal_zone_current() {
             diag_crash_msg("GetTimeZoneInformation() failed");
         }
     }
+}
+
+/**
+ * @brief Convert Windows FILETIME to cross-platform TimeReal format
+ * @param fileTime Windows FILETIME structure pointer
+ * @return Time in microseconds since Unix epoch
+ * 
+ * Converts Windows FILETIME (100-nanosecond intervals since January 1, 1601)
+ * to microseconds since Unix epoch (January 1, 1970). The conversion involves:
+ * 1. Combining low and high 32-bit parts into a 64-bit value
+ * 2. Subtracting the epoch difference (116444736000000000 100-ns intervals)
+ * 3. Converting from 100-nanosecond intervals to microseconds (divide by 10)
+ */
+TimeReal time_pal_native_to_real(const struct _FILETIME* fileTime) {
+    const i64 winEpochToUnixEpoch = i64_lit(116444736000000000);
+    const i64 winTickToMicro = i64_lit(10);
+
+    LARGE_INTEGER winTicks;
+    winTicks.LowPart = fileTime->dwLowDateTime;
+    winTicks.HighPart = fileTime->dwHighDateTime;
+
+    return (winTicks.QuadPart - winEpochToUnixEpoch) / winTickToMicro;
 }

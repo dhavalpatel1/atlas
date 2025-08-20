@@ -21,6 +21,8 @@ _Static_assert(false, "Unsupported platform");
 
 struct sFile {
     FileHandle handle;
+    FileAccessFlags access;
+    void* mapping;
     Allocator* allocator;
 };
 

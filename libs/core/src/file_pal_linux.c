@@ -15,21 +15,38 @@
 #include "core_memory.h"
 #include "core_string.h"
 #include "core_types.h"
-#include "file_internal.h"
+
 #include "linux/limits.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
+#include "file_internal.h"
+#include "time_internal.h"
+
+/**
+ * @brief Internal structure for managing memory-mapped files on Linux
+ * 
+ * Stores the memory mapping information needed for proper cleanup
+ * when the file is destroyed or the mapping is released.
+ */
+typedef struct {
+    void* addr;     /**< Memory address of the mapped region */
+    usize size;     /**< Size of the mapped region in bytes */
+} FileMapping;
+
 /** @brief Standard input file handle */
-File* g_file_stdin = &(File){ .handle = 0 };
+File* g_file_stdin = &(File){ .handle = 0, access = FileAccess_Read };
 
 /** @brief Standard output file handle */
-File* g_file_stdout = &(File){ .handle = 1 };
+File* g_file_stdout = &(File){ .handle = 1, access = FileAccess_Write };
 
 /** @brief Standard error file handle */
-File* g_file_stderr = &(File){ .handle = 2 };
+File* g_file_stderr = &(File){ .handle = 2, access = FileAccess_Write };
 
 /**
  * @brief Convert Linux errno values to cross-platform FileResult codes
@@ -133,6 +150,7 @@ FileResult file_create(Allocator* allocator, String path, FileMode mode, FileAcc
     *file = alloc_alloc_t(allocator, File);
     **file = (File) {
         .handle = fd,
+        .access = access,
         .allocator = allocator,
     };
 
@@ -155,6 +173,7 @@ FileResult file_temp(Allocator* allocator, File** file) {
     *file = alloc_alloc_t(allocator, File);
     **file = (File) {
         .handle = fd,
+        .access = FileAccess_Read | FileAccess_Write
         .allocator = allocator
     };
 
@@ -163,12 +182,24 @@ FileResult file_temp(Allocator* allocator, File** file) {
 
 void file_destroy(File* file) {
     diag_assert_msg(file->allocator, "Invalid file");
+
+    if (file->mapping) {
+        FileMapping* mapping = file->mapping;
+        const int res = munmap(mapping->addr, mapping->size);
+        if (UNLIKELY(res != 0)) {
+            diag_crash_msg("munmap() failed: {}", fmt_int(res));
+        }
+
+        alloc_free_t(file->allocator, mapping);
+    }
+
     close(file->handle);
     alloc_free_t(file->allocator, file);
 }
 
 FileResult file_write_sync(File* file, const String data) {
     diag_assert(file);
+    diag_assert_msg(file->access & FileAccess_Write, "File handle does not have write access");
 
     for (u8* itr = mem_begin(data); itr != mem_end(data);) {
         const int res = write(file->handle, itr, mem_end(data) - itr);
@@ -192,6 +223,7 @@ FileResult file_write_sync(File* file, const String data) {
 
 FileResult file_read_sync(File* file, DynString* dynstr) {
     diag_assert(file);
+    diag_assert_msg(file->access & FileAccess_Read, "File handle does not have read access");
 
     Mem readBuffer = mem_stack(usize_kibibyte);
     while (true) {
@@ -224,6 +256,29 @@ FileResult file_seek_sync(File* file, usize position) {
     return FileResult_Success;
 }
 
+/**
+ * @brief Get file metadata and statistics using Linux fstat()
+ * @param file File handle to query
+ * @return FileInfo structure with file metadata
+ * 
+ * Uses the Linux fstat() system call to retrieve file metadata including
+ * size and timestamps. Converts Linux-specific timespec structures to
+ * cross-platform TimeReal format.
+ */
+FileInfo file_stat_sync(File* file) {
+    struct stat statOutput;
+    const int res = fstat(file->handle, &statOutput);
+    if (UNLIKELY(res != 0)) {
+        diag_crash_msg("fstat() failed: {}", fmt_int(res));
+    }
+
+    return (FileInfo) {
+        .size = statOutput.st_size,
+        .accessTime = time_pal_native_to_real(statOutput.st_atim),
+        .modTime = time_pal_native_to_real(statOutput.st_mtim),
+    };
+}
+
 FileResult file_delete_sync(String path) {
     if (path.size >= PATH_MAX) {
         return FileResult_PathTooLong;
@@ -236,6 +291,63 @@ FileResult file_delete_sync(String path) {
     if (unlink((const char*)pathBuffer.ptr)) {
         return fileresult_from_errno();
     }
+
+    return FileResult_Success;
+}
+
+/**
+ * @brief Memory-map a file using Linux mmap() system call
+ * @param file File handle to map
+ * @param output Pointer to receive the mapped memory region as a String view
+ * @return FileResult indicating success or failure
+ * 
+ * Creates a memory mapping of the entire file using the Linux mmap() system call.
+ * The protection flags are determined by the file's access permissions:
+ * - Read access enables PROT_READ
+ * - Write access enables PROT_WRITE
+ * 
+ * Uses MAP_SHARED so that changes are visible to other processes and are
+ * written back to the file. The mapping is automatically cleaned up when
+ * the file is destroyed.
+ */
+FileResult file_map(File* file, String* output) {
+    diag_assert_msg(!file->mapping, "File is already mapped");
+
+    const usize size = file_stat_sync(file).size;
+
+    // Determine memory protection flags based on file access permissions
+    int prot = 0;
+    if (file->access & FileAccess_Read) {
+        prot |= PROT_READ;
+    }
+
+    if (file->access & FileAccess_Write) {
+        prot |= PROT_WRITE;
+    }
+
+    // Create the memory mapping
+    void* addr = mmap(null, size, prot, MAP_SHARED, file->handle, 0);
+    if (UNLIKELY(!addr)) {
+        return fileresult_from_errno();
+    }
+
+    // Allocate tracking structure for cleanup
+    file->mapping = alloc_alloc_t(file->allocator, FileMapping);
+    if (UNLIKELY(!file->mapping)) {
+        const int res = munmap(addr, size);
+        if (UNLIKELY(res != 0)) {
+            diag_crash_msg("munmap() failed: {}", fmt_int(res));
+        }
+
+        return FileResult_AllocationFailed;
+    }
+
+    *(FileMapping*)file->mapping = (FileMapping){
+        .addr = addr,
+        .size = size,
+    };
+
+    *output = mem_create(addr, size);
 
     return FileResult_Success;
 }

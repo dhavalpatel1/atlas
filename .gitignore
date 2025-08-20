@@ -29,3 +29,6 @@ cmake_build.json
 # Claude
 /.claude/*
 CLAUDE.md
+
+# Scripts
+/scripts

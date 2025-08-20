@@ -13,6 +13,9 @@
 #include "core_dynstring.h"
 #include "core_string.h"
 
+/** @brief Time representation in microseconds since Unix epoch */
+typedef i64 TimeReal;
+
 /** @brief Opaque file handle structure */
 typedef struct sFile File;
 
@@ -32,6 +35,7 @@ typedef enum {
     FileResult_PathInvalid,           /**< Path contains invalid characters */
     FileResult_TooManyOpenFiles,      /**< Too many files open */
     FileResult_IsDirectory,           /**< Operation attempted on a directory */
+    FileResult_AllocationFailed,     /**< Memory allocation failed during operation */
     FileResult_UnknownError,          /**< Unknown or unspecified error */
 
     FileResult_Count,                 /**< Number of result codes */
@@ -53,6 +57,19 @@ typedef enum {
     FileAccess_Read  = 1 << 0,        /**< Read access permission */
     FileAccess_Write = 1 << 1,        /**< Write access permission */
 } FileAccessFlags;
+
+/**
+ * @brief File metadata and statistics information
+ * 
+ * Contains information about a file including its size and timestamps.
+ * Timestamps are represented as microseconds since Unix epoch for
+ * cross-platform consistency.
+ */
+typedef struct {
+    usize size;              /**< File size in bytes */
+    TimeReal accessTime;     /**< Last access time in microseconds since Unix epoch */
+    TimeReal modTime;        /**< Last modification time in microseconds since Unix epoch */
+} FileInfo;
 
 /** @brief Global standard input file handle */
 extern File* g_file_stdin;
@@ -120,8 +137,51 @@ FileResult file_read_to_end_sync(File* file, DynString* outData);
 FileResult file_seek_sync(File* file, usize position);
 
 /**
+ * @brief Get file metadata and statistics
+ * @param file File handle to query
+ * @return FileInfo structure containing file metadata
+ * 
+ * Retrieves information about the file including size, access time,
+ * and modification time. The file must be open and valid.
+ * 
+ * @note This function will crash on failure rather than return an error code
+ * @see FileInfo
+ */
+FileInfo file_stat_sync(File* file);
+
+/**
  * @brief Delete a file from the filesystem
  * @param path Path to the file to delete
  * @return FileResult indicating success or failure
  */
 FileResult file_delete_sync(String path);
+
+/**
+ * @brief Memory-map a file for direct memory access
+ * @param file File handle to map (must have appropriate access permissions)
+ * @param output Pointer to receive the mapped memory region as a String view
+ * @return FileResult indicating success or failure
+ * 
+ * Maps the entire file into memory, allowing direct read/write access to
+ * the file contents through memory operations. The file access permissions
+ * determine whether the mapping is read-only or read-write.
+ * 
+ * The mapped region is automatically unmapped when the file is destroyed.
+ * Only one mapping per file is allowed - subsequent calls will fail.
+ * 
+ * @retval FileResult_Success File mapped successfully
+ * @retval FileResult_AllocationFailed Memory allocation failed
+ * @retval FileResult_UnknownError System mapping operation failed
+ * 
+ * @pre file must be open and valid
+ * @pre file must not already be mapped
+ * @post On success, output contains a String view of the mapped memory
+ * @post The file remains mapped until file_destroy() is called
+ * 
+ * @note The returned String view points directly to file contents
+ * @note Write operations through the mapping may not be immediately visible to other processes
+ * @warning Accessing the mapping after file_destroy() results in undefined behavior
+ * 
+ * @see file_destroy()
+ */
+FileResult file_map(File* file, String* output);
