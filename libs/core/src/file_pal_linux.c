@@ -173,7 +173,7 @@ FileResult file_temp(Allocator* allocator, File** file) {
     *file = alloc_alloc_t(allocator, File);
     **file = (File) {
         .handle = fd,
-        .access = FileAccess_Read | FileAccess_Write
+        .access = FileAccess_Read | FileAccess_Write,
         .allocator = allocator
     };
 
