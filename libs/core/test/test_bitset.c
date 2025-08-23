@@ -31,7 +31,7 @@ spec(bitset) {
 
         anvil_eq_int(bitset_size(bits), 64 * 32);
 
-        // Check no bit is set.
+        
         anvil_eq_int(bitset_count(bits), 0);
         for (u32 i = 0; i != 64; ++i) {
             anvil(!bitset_test(bits, i));
@@ -45,11 +45,11 @@ spec(bitset) {
         anvil(bitset_test(bits, 42));
         anvil_eq_int(bitset_count(bits), 2);
 
-        // Clear the set bits.
+        
         bitset_clear(bits, 42);
         bitset_clear(bits, 1337);
 
-        // Check no bit is set.
+        
         anvil_eq_int(bitset_count(bits), 0);
         for (u32 i = 0; i != 64; ++i) {
             anvil(!bitset_test(bits, i));
@@ -165,7 +165,7 @@ spec(bitset) {
         bitset_or(bits64, unevenBits64);
         anvil_eq_int(bitset_count(bits64), 64);
 
-        // Check that all bits are set.
+        
         for (u32 i = 0; i != 64; ++i) {
             anvil(bitset_test(bits64, i));
         }

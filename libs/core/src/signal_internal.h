@@ -1,11 +1,3 @@
-/**
- * @file signal_internal.h
- * @brief Internal signal handling platform abstraction layer interface
- *
- * This header defines the platform abstraction layer interface for signal
- * handling operations including signal handler setup, status checking, and
- * signal state management across different operating systems.
- */
 
 #pragma once
 

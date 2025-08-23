@@ -68,7 +68,7 @@ FORCE_INLINE bool thread_pal_atomic_compare_exchange_i64(i64* ptr, i64* expected
 FORCE_INLINE i64 thread_pal_atomic_add_i64(i64* ptr, i64 value) {
     i64 current, add;
     do {
-        current = InterlockedCompareExchange64((volatile i64*)ptr, 0, 0); // Atomic load
+        current = InterlockedCompareExchange64((volatile i64*)ptr, 0, 0);
         add = current + value;
     } while (InterlockedCompareExchange64((volatile i64*)ptr, add, current) != current);
 
@@ -78,7 +78,7 @@ FORCE_INLINE i64 thread_pal_atomic_add_i64(i64* ptr, i64 value) {
 FORCE_INLINE i64 thread_pal_atomic_sub_i64(i64* ptr, i64 value) {
     i64 current, sub;
     do {
-        current = InterlockedCompareExchange64((volatile i64*)ptr, 0, 0); // Atomic load
+        current = InterlockedCompareExchange64((volatile i64*)ptr, 0, 0);
         sub = current - value;
     } while (InterlockedCompareExchange64((volatile i64*)ptr, sub, current) != current);
 

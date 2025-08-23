@@ -1,45 +1,18 @@
-/**
- * @file core_bits.h
- * @brief Bit manipulation functions and utilities
- *
- * This header provides functions for bit counting, shifting, and manipulation
- * operations. It includes utilities for population count, trailing zeros, and
- * bit-level conversions.
- */
-
 #pragma once
 
 #include "core_memory.h"
 #include "core_types.h"
 
-/** @brief Convert bits to bytes (divide by 8) */
 #define bits_to_bytes(_BITS_) ((_BITS_) >> 3)
 
-/** @brief Convert bytes to bits (multiply by 8) */
 #define bytes_to_bits(_BYTES_) ((_BYTES_) * 8)
 
-/** @brief Get the bit position within a byte (0-7) */
 #define bit_in_byte(_BIT_) ((_BIT_)&0b111)
 
-/**
- * @brief Count the number of set bits in a 32-bit value
- * @param value 32-bit value to count bits in
- * @return Number of set bits (population count)
- */
 u8 bits_popcnt_32(u32 value);
 
-/**
- * @brief Count the number of set bits in a 64-bit value
- * @param value 64-bit value to count bits in
- * @return Number of set bits (population count)
- */
 u8 bits_popcnt_64(u64 value);
 
-/**
- * @brief Generic macro for counting set bits (population count)
- * @param _VAL_ Value to count bits in (32-bit or 64-bit)
- * @return Number of set bits
- */
 #define bits_popcnt(_VAL_)                  \
     _Generic((_VAL_),                       \
         u32 : bits_popcnt_32((u32)(_VAL_)), \

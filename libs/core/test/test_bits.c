@@ -60,7 +60,7 @@ spec(bits) {
     }
 
     it("can check if a 32 bit integer is a power-of-two") {
-        // Undefined for val,0.
+        
         anvil(bits_ispow2_32(1));
         anvil(bits_ispow2_32(2));
         anvil(!bits_ispow2_32(3));
@@ -79,7 +79,7 @@ spec(bits) {
     }
 
     it("can check if a 64 bit integer is a power-of-two") {
-        // Undefined for val,0.
+        
         anvil(bits_ispow2_64(128));
         anvil(!bits_ispow2_64(2147483647));
         anvil(bits_ispow2_64(2147483648));
@@ -93,7 +93,7 @@ spec(bits) {
     }
 
     it("can compute the next power-of-two for a 32 bit integer") {
-        // Undefined for val,0.
+        
         anvil_eq_int(bits_nextpow2_32(1), 1);
         anvil_eq_int(bits_nextpow2_32(2), 2);
         anvil_eq_int(bits_nextpow2_32(3), 4);
@@ -112,11 +112,11 @@ spec(bits) {
         anvil_eq_int(bits_nextpow2_32(4096), 4096);
         anvil_eq_int(bits_nextpow2_32(u32_lit(2147483647)), u32_lit(2147483648));
         anvil_eq_int(bits_nextpow2_32(u32_lit(2147483648)), u32_lit(2147483648));
-        // Undefined for val > 2147483648.
+        
     }
 
     it("can compute the next power-of-two for a 64 bit integer") {
-        // Undefined for val,0.
+        
         anvil_eq_int(bits_nextpow2_64(u64_lit(128)), u64_lit(128));
         anvil_eq_int(bits_nextpow2_64(u64_lit(255)), u64_lit(256));
         anvil_eq_int(bits_nextpow2_64(u64_lit(257)), u64_lit(512));
@@ -126,7 +126,7 @@ spec(bits) {
         anvil_eq_int(bits_nextpow2_64(u64_lit(68719476736)), u64_lit(68719476736));
         anvil_eq_int(bits_nextpow2_64(u64_lit(9223372036854775807)), u64_lit(9223372036854775808));
         anvil_eq_int(bits_nextpow2_64(u64_lit(9223372036854775808)), u64_lit(9223372036854775808));
-        // Undefined for val > 9223372036854775808.
+        
     }
 
     it("can compute the amount of padding required to align a 32 bit integer") {

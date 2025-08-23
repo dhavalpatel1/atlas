@@ -1,10 +1,3 @@
-/**
- * @file init_internal.h
- * @brief Internal jobs system initialization interface
- *
- * This header defines the internal initialization and teardown functions
- * for the job system components including scheduler and executor subsystems.
- */
 
 #pragma once
 

@@ -1,187 +1,71 @@
-/**
- * @file core_file.h
- * @brief File I/O operations and file management
- *
- * This header provides cross-platform file operations including reading, writing,
- * seeking, and file management. It supports both synchronous I/O operations and
- * standard stream handles.
- */
-
 #pragma once
 
 #include "core_alloc.h"
 #include "core_dynstring.h"
 #include "core_string.h"
 
-/** @brief Time representation in microseconds since Unix epoch */
 typedef i64 TimeReal;
 
-/** @brief Opaque file handle structure */
 typedef struct sFile File;
 
-/**
- * @brief File operation result codes
- */
 typedef enum {
-    FileResult_Success = 0,           /**< Operation completed successfully */
-    FileResult_AlreadyExists,         /**< File already exists */
-    FileResult_DiskFull,              /**< Insufficient disk space */
-    FileResult_InvalidFilename,       /**< Invalid filename or path */
-    FileResult_Locked,                /**< File is locked by another process */
-    FileResult_NoAccess,              /**< Access denied */
-    FileResult_NoDataAvailable,       /**< No data available for reading */
-    FileResult_NotFound,              /**< File or path not found */
-    FileResult_PathTooLong,           /**< Path exceeds maximum length */
-    FileResult_PathInvalid,           /**< Path contains invalid characters */
-    FileResult_TooManyOpenFiles,      /**< Too many files open */
-    FileResult_IsDirectory,           /**< Operation attempted on a directory */
-    FileResult_AllocationFailed,     /**< Memory allocation failed during operation */
-    FileResult_UnknownError,          /**< Unknown or unspecified error */
+    FileResult_Success = 0,
+    FileResult_AlreadyExists,
+    FileResult_DiskFull,
+    FileResult_InvalidFilename,
+    FileResult_Locked,
+    FileResult_NoAccess,
+    FileResult_NoDataAvailable,
+    FileResult_NotFound,
+    FileResult_PathTooLong,
+    FileResult_PathInvalid,
+    FileResult_TooManyOpenFiles,
+    FileResult_IsDirectory,
+    FileResult_AllocationFailed,
+    FileResult_UnknownError,
 
-    FileResult_Count,                 /**< Number of result codes */
+    FileResult_Count,
 } FileResult;
 
-/**
- * @brief File opening modes
- */
 typedef enum {
-    FileMode_Open,                    /**< Open existing file */
-    FileMode_Append,                  /**< Open for appending, create if needed */
-    FileMode_Create,                  /**< Create new file, truncate if exists */
+    FileMode_Open,
+    FileMode_Append,
+    FileMode_Create,
 } FileMode;
 
-/**
- * @brief File access permission flags
- */
 typedef enum {
-    FileAccess_Read  = 1 << 0,        /**< Read access permission */
-    FileAccess_Write = 1 << 1,        /**< Write access permission */
+    FileAccess_Read  = 1 << 0,
+    FileAccess_Write = 1 << 1,
 } FileAccessFlags;
 
-/**
- * @brief File metadata and statistics information
- * 
- * Contains information about a file including its size and timestamps.
- * Timestamps are represented as microseconds since Unix epoch for
- * cross-platform consistency.
- */
 typedef struct {
-    usize size;              /**< File size in bytes */
-    TimeReal accessTime;     /**< Last access time in microseconds since Unix epoch */
-    TimeReal modTime;        /**< Last modification time in microseconds since Unix epoch */
+    usize size;
+    TimeReal accessTime;
+    TimeReal modTime;
 } FileInfo;
 
-/** @brief Global standard input file handle */
 extern File* g_file_stdin;
-/** @brief Global standard output file handle */
 extern File* g_file_stdout;
-/** @brief Global standard error file handle */
 extern File* g_file_stderr;
 
-/**
- * @brief Get a string representation of a file result code
- * @param result File result code to convert
- * @return String describing the result code
- */
 String file_result_str(FileResult result);
 
-/**
- * @brief Create or open a file with specified mode and access flags
- * @param allocator Allocator for file handle allocation
- * @param path Path to the file
- * @param mode File opening mode
- * @param flags Access permission flags
- * @param file Output pointer for the created file handle
- * @return FileResult indicating success or failure
- */
 FileResult file_create(Allocator* allocator, String path, FileMode mode, FileAccessFlags flags, File** file);
 
-/**
- * @brief Create a temporary file
- * @param allocator Allocator for file handle allocation
- * @param file Output pointer for the created temporary file handle
- * @return FileResult indicating success or failure
- */
 FileResult file_temp(Allocator* allocator, File** file);
 
-/**
- * @brief Close and destroy a file handle
- * @param file File handle to destroy
- */
 void file_destroy(File* file);
 
-/**
- * @brief Write data to a file synchronously
- * @param file File handle to write to
- * @param data Data to write
- * @return FileResult indicating success or failure
- */
 FileResult file_write_sync(File* file, String data);
 
-/**
- * @brief Read all data from a file synchronously
- * @param file File handle to read from
- * @param outData Dynamic string to store the read data
- * @return FileResult indicating success or failure
- */
 FileResult file_read_sync(File* file, DynString* outData);
 
 FileResult file_read_to_end_sync(File* file, DynString* outData);
 
-/**
- * @brief Seek to a specific position in a file
- * @param file File handle to seek in
- * @param position Byte offset from the beginning of the file
- * @return FileResult indicating success or failure
- */
 FileResult file_seek_sync(File* file, usize position);
 
-/**
- * @brief Get file metadata and statistics
- * @param file File handle to query
- * @return FileInfo structure containing file metadata
- * 
- * Retrieves information about the file including size, access time,
- * and modification time. The file must be open and valid.
- * 
- * @note This function will crash on failure rather than return an error code
- * @see FileInfo
- */
 FileInfo file_stat_sync(File* file);
 
-/**
- * @brief Delete a file from the filesystem
- * @param path Path to the file to delete
- * @return FileResult indicating success or failure
- */
 FileResult file_delete_sync(String path);
 
-/**
- * @brief Memory-map a file for direct memory access
- * @param file File handle to map (must have appropriate access permissions)
- * @param output Pointer to receive the mapped memory region as a String view
- * @return FileResult indicating success or failure
- * 
- * Maps the entire file into memory, allowing direct read/write access to
- * the file contents through memory operations. The file access permissions
- * determine whether the mapping is read-only or read-write.
- * 
- * The mapped region is automatically unmapped when the file is destroyed.
- * Only one mapping per file is allowed - subsequent calls will fail.
- * 
- * @retval FileResult_Success File mapped successfully
- * @retval FileResult_AllocationFailed Memory allocation failed
- * @retval FileResult_UnknownError System mapping operation failed
- * 
- * @pre file must be open and valid
- * @pre file must not already be mapped
- * @post On success, output contains a String view of the mapped memory
- * @post The file remains mapped until file_destroy() is called
- * 
- * @note The returned String view points directly to file contents
- * @note Write operations through the mapping may not be immediately visible to other processes
- * @warning Accessing the mapping after file_destroy() results in undefined behavior
- * 
- * @see file_destroy()
- */
 FileResult file_map(File* file, String* output);

@@ -34,7 +34,6 @@ spec(graph) {
 
         anvil_eq_int(jobs_graph_task_count(job), 4);
 
-        // Setup D to depend on A, B and C.
         jobs_graph_task_depend(job, a, d);
         jobs_graph_task_depend(job, b, d);
         jobs_graph_task_depend(job, c, d);
@@ -44,13 +43,11 @@ spec(graph) {
         anvil_eq_int(jobs_graph_task_root_count(job), 3);
         anvil_eq_int(jobs_graph_task_leaf_count(job), 1);
 
-        // Meaning only D has a parent.
         anvil(jobs_graph_task_has_parent(job, d));
         anvil(!jobs_graph_task_has_parent(job, a));
         anvil(!jobs_graph_task_has_parent(job, b));
         anvil(!jobs_graph_task_has_parent(job, c));
 
-        // And A, B, C have a child.
         anvil(jobs_graph_task_has_child(job, a));
         anvil(jobs_graph_task_has_child(job, b));
         anvil(jobs_graph_task_has_child(job, c));
@@ -74,7 +71,6 @@ spec(graph) {
 
         anvil_eq_int(jobs_graph_task_count(job), 4);
 
-        // Setup B, C, D to depend on A.
         jobs_graph_task_depend(job, a, b);
         jobs_graph_task_depend(job, a, c);
         jobs_graph_task_depend(job, a, d);
@@ -84,21 +80,16 @@ spec(graph) {
         anvil_eq_int(jobs_graph_task_root_count(job), 1);
         anvil_eq_int(jobs_graph_task_leaf_count(job), 3);
 
-        // Meaning B, C, D have a parent.
         anvil(!jobs_graph_task_has_parent(job, a));
         anvil(jobs_graph_task_has_parent(job, b));
         anvil(jobs_graph_task_has_parent(job, c));
         anvil(jobs_graph_task_has_parent(job, d));
 
-        // And only A has a child.
         anvil(jobs_graph_task_has_child(job, a));
         anvil(!jobs_graph_task_has_child(job, b));
         anvil(!jobs_graph_task_has_child(job, c));
         anvil(!jobs_graph_task_has_child(job, d));
 
-        // Verify A has B, C, D as children.
-        // TODO: Should we guarantee the order of dependencies like this? The current implementation
-        // does keep the order but there is no real reason we need to.
         JobTaskChildItr itr = jobs_graph_task_child_begin(job, a);
         anvil_eq_int(itr.task, b);
         itr = jobs_graph_task_child_next(job, itr);
@@ -117,7 +108,6 @@ spec(graph) {
         const JobTaskId a = jobs_graph_add_task(job, string_lit("A"), null, mem_empty);
         const JobTaskId b = jobs_graph_add_task(job, string_lit("B"), null, mem_empty);
 
-        // Setup cycle between A and B.
         jobs_graph_task_depend(job, a, b);
         jobs_graph_task_depend(job, b, a);
 

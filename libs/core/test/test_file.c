@@ -37,16 +37,13 @@ spec(file) {
     it("can read a file to the end") {
         const usize testDataSize = 2345;
 
-        // Write test data to the file.
         test_file_write_data(&buffer, testDataSize);
         anvil_eq_int(file_write_sync(file, dynstring_view(&buffer)), FileResult_Success);
         anvil_eq_int(file_seek_sync(file, 0), FileResult_Success);
 
-        // Read the file to the end.
         dynstring_clear(&buffer);
         anvil_eq_int(file_read_to_end_sync(file, &buffer), FileResult_Success);
 
-        // Verify that all data was retrieved.
         anvil_eq_int(buffer.size, testDataSize);
         test_file_verify_data(_testCtx, dynstring_view(&buffer));
     }

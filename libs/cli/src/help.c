@@ -1,12 +1,3 @@
-/**
- * @file help.c
- * @brief Implementation of CLI help text generation and formatting
- *
- * This file implements functionality for generating comprehensive help documentation
- * for CLI applications including usage lines, argument descriptions, flag descriptions,
- * and formatted output with optional terminal styling support.
- */
-
 #include "core_dynstring.h"
 #include "core_format.h"
 #include "core_tty.h"
@@ -15,45 +6,16 @@
 
 #include "app_internal.h"
 
-/** @brief Maximum width for help text formatting */
 #define cli_help_max_width 80
 
-/**
- * @brief Generate bold style format argument if styling is enabled
- *
- * Returns a TTY style format argument with bold text formatting
- * if the Style flag is set, otherwise returns a no-op format argument.
- *
- * @param flags Help formatting flags
- * @return Format argument for bold styling or no-op
- */
 static FormatArg arg_style_bold(const CliHelpFlags flags) {
     return flags & CliHelpFlags_Style ? fmt_ttystyle(.flags = TtyStyleFlags_Bold) : fmt_nop();
 }
 
-/**
- * @brief Generate style reset format argument if styling is enabled
- *
- * Returns a TTY style reset format argument to clear all styling
- * if the Style flag is set, otherwise returns a no-op format argument.
- *
- * @param flags Help formatting flags
- * @return Format argument for style reset or no-op
- */
 static FormatArg arg_style_reset(const CliHelpFlags flags) {
     return flags & CliHelpFlags_Style ? fmt_ttystyle() : fmt_nop();
 }
 
-/**
- * @brief Check if the application has any options of the specified type
- *
- * Iterates through all registered options to determine if any match
- * the specified option type (flag or argument).
- *
- * @param app The CLI application
- * @param type The option type to search for
- * @return True if options of the specified type exist, false otherwise
- */
 static bool cli_help_has_options_of_type(CliApp* app, const CliOptionType type) {
     dynarray_for_t(&app->options, CliOption, opt, {
         if (opt->type == type) {
@@ -64,16 +26,6 @@ static bool cli_help_has_options_of_type(CliApp* app, const CliOptionType type) 
     return false;
 }
 
-/**
- * @brief Generate usage string for a single option
- *
- * Creates a formatted usage string showing how the option should be used
- * in command line invocation, including brackets for optional parameters,
- * value placeholders, and multi-value indicators.
- *
- * @param opt The option to generate usage for
- * @return Formatted usage string for the option
- */
 static String cli_help_option_usage(CliOption* opt) {
     DynString dynstr = dynstring_create_over(alloc_alloc(g_alloc_scratch, 128, 1));
 
@@ -113,16 +65,6 @@ static String cli_help_option_usage(CliOption* opt) {
     return res;
 }
 
-/**
- * @brief Write the usage line to the help output
- *
- * Generates and formats the usage line showing the application name
- * and all available options with appropriate line wrapping.
- *
- * @param dynstr Target dynamic string for output
- * @param app The CLI application
- * @param flags Help formatting flags
- */
 static void cli_help_write_usage(DynString* dynstr, CliApp* app, const CliHelpFlags flags) {
     fmt_write(dynstr, "usage: {}{}{}", arg_style_bold(flags), fmt_text(app->name), arg_style_reset(flags));
 
@@ -143,16 +85,6 @@ static void cli_help_write_usage(DynString* dynstr, CliApp* app, const CliHelpFl
     fmt_write(dynstr, "\n");
 }
 
-/**
- * @brief Write the arguments section to the help output
- *
- * Generates formatted documentation for all positional arguments
- * including names, required/optional status, and descriptions.
- *
- * @param dynstr Target dynamic string for output
- * @param app The CLI application
- * @param flags Help formatting flags
- */
 static void cli_help_write_args(DynString* dynstr, CliApp* app, const CliHelpFlags flags) {
     fmt_write(dynstr, "{}Arguments:{}\n", arg_style_bold(flags), arg_style_reset(flags));
 
@@ -174,16 +106,6 @@ static void cli_help_write_args(DynString* dynstr, CliApp* app, const CliHelpFla
     });
 }
 
-/**
- * @brief Write the flags section to the help output
- *
- * Generates formatted documentation for all flag options including
- * short and long names, required/optional status, and descriptions.
- *
- * @param dynstr Target dynamic string for output
- * @param app The CLI application
- * @param flags Help formatting flags
- */
 static void cli_help_write_flags(DynString* dynstr, CliApp* app, const CliHelpFlags flags) {
     fmt_write(dynstr, "{}Flags:{}\n", arg_style_bold(flags), arg_style_reset(flags));
 
@@ -209,17 +131,6 @@ static void cli_help_write_flags(DynString* dynstr, CliApp* app, const CliHelpFl
     });
 }
 
-/**
- * @brief Write complete help documentation to a dynamic string
- *
- * Generates comprehensive help text including usage line, application
- * description, arguments section, and flags section with appropriate
- * formatting and styling.
- *
- * @param dynstr Target dynamic string for output
- * @param app The CLI application
- * @param flags Help formatting flags
- */
 void cli_help_write(DynString* dynstr, CliApp* app, const CliHelpFlags flags) {
     cli_help_write_usage(dynstr, app, flags);
 
@@ -240,16 +151,6 @@ void cli_help_write(DynString* dynstr, CliApp* app, const CliHelpFlags flags) {
     }
 }
 
-/**
- * @brief Write complete help documentation to a file
- *
- * Creates a temporary dynamic string, generates comprehensive help text
- * with appropriate styling based on TTY detection, then writes the result
- * to the specified file.
- *
- * @param app The CLI application
- * @param out Output file to write help text to
- */
 void cli_help_write_file(CliApp* app, File* out) {
     DynString str = dynstring_create(g_alloc_heap, 1024);
 

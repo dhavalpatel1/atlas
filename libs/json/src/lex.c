@@ -1,12 +1,3 @@
-/**
- * @file lex.c
- * @brief JSON lexical analyzer implementation
- *
- * Implements the JSON tokenizer that breaks JSON text into tokens for parsing.
- * Handles all JSON syntax including string escape sequences, Unicode support,
- * numeric literals, and proper error reporting for malformed input.
- */
-
 #include "core_ascii.h"
 #include "core_diag.h"
 #include "core_format.h"
@@ -14,46 +5,20 @@
 
 #include "lex.h"
 
-/** @brief Maximum allowed size for JSON string values (64 KiB) */
 #define json_string_max_size (usize_kibibyte * 64)
 
-/**
- * @brief Create an error token with the specified error code
- * @param _ERR_ Error code to include in the token
- * @return JsonToken structure configured as an error token
- */
 #define json_token_err(_ERR_)        \
     (JsonToken) {                    \
         .type = JsonTokenType_Error, \
         .val_error = (_ERR_)         \
     }
 
-/**
- * @brief Parse a numeric literal from JSON input
- * @param str Input string starting with a number
- * @param out Token structure to store the parsed number
- * @return Remaining input after the number
- *
- * Parses JSON numbers including integers, decimals, and scientific notation.
- * Uses the core format reader for IEEE 754 double precision parsing.
- */
 static String json_lex_number(String str, JsonToken* out) {
     out->type = JsonTokenType_Number;
 
     return format_read_f64(str, &out->val_number);
 }
 
-/**
- * @brief Parse a string literal from JSON input with escape sequence handling
- * @param str Input string starting with opening quote
- * @param out Token structure to store the parsed string
- * @return Remaining input after the closing quote
- *
- * Handles all JSON escape sequences including:
- * - Standard escapes: \", \\, \/, \b, \f, \n, \r, \t
- * - Unicode escapes: \uXXXX (4 hex digits)
- * - Error detection for invalid sequences and unterminated strings
- */
 static String json_lex_string(String str, JsonToken* out) {
     diag_assert(*string_begin(str) == '"');
     str = string_consume(str, 1);
@@ -156,15 +121,6 @@ Ret:
     return str;
 }
 
-/**
- * @brief Parse the 'true' boolean literal
- * @param str Input string starting with 't'
- * @param out Token structure to store the result
- * @return Remaining input after 'true' or after error character
- *
- * Validates that the input contains the complete 'true' literal.
- * If validation fails, consumes one character and reports an error.
- */
 static String json_lex_true(String str, JsonToken* out) {
     if (LIKELY(string_starts_with(str, string_lit("true")))) {
         out->type = JsonTokenType_True;
@@ -177,15 +133,6 @@ static String json_lex_true(String str, JsonToken* out) {
     return string_consume(str, 1);
 }
 
-/**
- * @brief Parse the 'false' boolean literal
- * @param str Input string starting with 'f'
- * @param out Token structure to store the result
- * @return Remaining input after 'false' or after error character
- *
- * Validates that the input contains the complete 'false' literal.
- * If validation fails, consumes one character and reports an error.
- */
 static String json_lex_false(String str, JsonToken* out) {
     if (LIKELY(string_starts_with(str, string_lit("false")))) {
         out->type = JsonTokenType_False;
@@ -198,15 +145,6 @@ static String json_lex_false(String str, JsonToken* out) {
     return string_consume(str, 1);
 }
 
-/**
- * @brief Parse the 'null' literal
- * @param str Input string starting with 'n'
- * @param out Token structure to store the result
- * @return Remaining input after 'null' or after error character
- *
- * Validates that the input contains the complete 'null' literal.
- * If validation fails, consumes one character and reports an error.
- */
 static String json_lex_null(String str, JsonToken* out) {
     if (LIKELY(string_starts_with(str, string_lit("null")))) {
         out->type = JsonTokenType_Null;

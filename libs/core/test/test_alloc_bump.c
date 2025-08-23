@@ -7,8 +7,6 @@ spec(alloc_bump) {
     it("tracks the maximum remaining size") {
         Allocator* alloc = alloc_bump_create_stack(128);
 
-        // Starting 'maxSize' is not the same as the memory size as the bump allocator itself needs
-        // space for its bookkeeping.
         const usize startingSize = alloc_max_size(alloc);
 
         alloc_alloc(alloc, 32, sizeof(void*));
@@ -21,7 +19,7 @@ spec(alloc_bump) {
 
     it("respects the requested alignment") {
         Allocator* alloc = alloc_bump_create_stack(256);
-        alloc_alloc(alloc, 32, 32); // Start with an alignment of (atleast) 32 bytes.
+        alloc_alloc(alloc, 32, 32);
 
         const usize startingSize = alloc_max_size(alloc);
 

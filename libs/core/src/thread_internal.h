@@ -1,11 +1,3 @@
-/**
- * @file thread_internal.h
- * @brief Internal threading platform abstraction layer interface
- *
- * This header defines the platform abstraction layer interface for threading
- * operations including thread creation, synchronization primitives, atomic
- * operations, and cross-platform threading utilities.
- */
 
 #pragma once
 

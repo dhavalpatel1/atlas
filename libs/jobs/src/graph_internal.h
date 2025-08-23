@@ -1,11 +1,3 @@
-/**
- * @file graph_internal.h
- * @brief Internal job graph structure definitions
- *
- * This header defines the internal structures used for job graph representation
- * including task storage, dependency tracking, and link management for the
- * job scheduling system.
- */
 
 #include "core_dynarray.h"
 

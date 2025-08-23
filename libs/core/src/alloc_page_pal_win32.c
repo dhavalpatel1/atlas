@@ -1,13 +1,3 @@
-/**
- * @file alloc_page_pal_win32.c
- * @brief Windows-specific page allocator implementation using VirtualAlloc.
- *
- * This file implements the page allocator for Windows platforms using the
- * VirtualAlloc and VirtualFree API functions. The allocator provides large
- * memory allocations aligned to page boundaries and is suitable for allocating
- * backing memory for other allocators or large data structures.
- */
-
 #include "alloc_internal.h"
 #include "core_alloc.h"
 #include "core_annotation.h"
@@ -61,9 +51,9 @@ static usize alloc_page_max_size(Allocator* allocator) {
 static struct AllocatorPage g_allocatorIntern;
 
 Allocator* alloc_page_init() {
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-    const size_t pageSize = si.dwPageSize;
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    const usize pageSize = sysInfo.dwPageSize;
 
     g_allocatorIntern = (struct AllocatorPage) {
         (Allocator) {

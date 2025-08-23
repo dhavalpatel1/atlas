@@ -1,11 +1,3 @@
-/**
- * @file diag.c
- * @brief Diagnostic and assertion handling implementation
- *
- * This file implements diagnostic functionality including assertion handling,
- * error reporting, and crash management. It provides thread-local assertion
- * handlers and various utility functions for debugging and error reporting.
- */
 
 #include "core_diag.h"
 #include "core_file.h"
@@ -13,23 +5,9 @@
 
 #include "diag_internal.h"
 
-/** @brief Thread-local custom assertion handler function pointer */
 THREAD_LOCAL AssertHandler g_assertHandler;
-/** @brief Thread-local context data for the assertion handler */
 THREAD_LOCAL void* g_assertHandlerContext;
 
-/**
- * @brief Default assertion handler that prints error messages
- *
- * This is the default handler used when no custom assertion handler is set.
- * It prints assertion failure information including the message, file, and
- * line number to stderr.
- *
- * @param msg The assertion message
- * @param source Source location information (file and line)
- * @param context User context (unused in default handler)
- * @return false to indicate the assertion should cause a crash
- */
 static bool assert_handler_print(String msg, const SourceLoc source, void* context) {
     (void)context;
 
@@ -38,14 +16,6 @@ static bool assert_handler_print(String msg, const SourceLoc source, void* conte
     return false;
 }
 
-/**
- * @brief Get the current assertion handler
- *
- * Returns the currently active assertion handler, falling back to the
- * default print handler if no custom handler has been set.
- *
- * @return The active assertion handler function
- */
 static AssertHandler assert_handler() {
     return g_assertHandler ? g_assertHandler : assert_handler_print;
 }

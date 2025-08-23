@@ -1,12 +1,3 @@
-/**
- * @file compare.c
- * @brief Implementation of comparison functions for various data types
- *
- * This file provides comparison function implementations for primitive types
- * including signed and unsigned integers, floating-point numbers, and strings.
- * It includes both normal and reverse comparison variants for sorting operations.
- */
-
 #include "core_compare.h"
 #include "core_string.h"
 
@@ -33,7 +24,7 @@ COMPARE_DEFINE_ARITHMETIC(usize)
 COMPARE_DEFINE_ARITHMETIC(f32)
 COMPARE_DEFINE_ARITHMETIC(f64)
 
-i8 compare_string(const void* a, const void* b) {  /* Fixed function name: was comapare_string */
+i8 compare_string(const void* a, const void* b) {
     return string_cmp(*(const String*)a, *(const String*)b);
 }
 

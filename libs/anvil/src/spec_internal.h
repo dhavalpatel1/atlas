@@ -1,11 +1,3 @@
-/**
- * @file spec_internal.h
- * @brief Internal Anvil specification structures and execution context
- *
- * This header defines the internal structures for Anvil test specification
- * management including test contexts, execution state, and spec definitions.
- */
-
 #pragma once
 
 #include "anvil_spec.h"

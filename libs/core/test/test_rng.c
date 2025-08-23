@@ -21,8 +21,6 @@ spec(rng) {
         }
         const float avg = sum / iterations;
 
-        // Uniform distribution should average out to 0.5.
-        // Note: Adding more iterations would allow a tighter tolerance here.
         anvil_eq_float(avg, 0.5f, 1e-2f);
 
         rng_destroy(rng);
@@ -43,8 +41,6 @@ spec(rng) {
         }
         const float avg = sum / iterations;
 
-        // Gaussian distribution should average out to 0.
-        // Note: Adding more iterations would allow a tighter tolerance here.
         anvil_eq_float(avg, 0.0f, 1e-2f);
 
         rng_destroy(rng);

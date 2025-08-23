@@ -1,12 +1,3 @@
-/**
- * @file path.c
- * @brief Cross-platform file path manipulation utilities
- *
- * This file implements file path operations that work consistently across
- * different operating systems. It handles path normalization, absolute/relative
- * path detection, path joining, and working directory management with support
- * for both POSIX (/path/to/file) and Windows (C:\path\to\file) style paths.
- */
 
 #include "core_array.h"
 #include "core_ascii.h"
@@ -21,32 +12,17 @@
 #include "init_internal.h"
 #include "path_internal.h"
 
-/** @brief Path separators for cross-platform compatibility */
+
 static String g_path_seperators = string_static("/\\");
 
-/**
- * @brief Check if a path string ends with a path separator
- * @param str The path string to check
- * @return true if the path ends with '/' or '\', false otherwise
- */
 static bool path_ends_with_seperator(String str) {
     return mem_contains(g_path_seperators, *string_last(str));
 }
 
-/**
- * @brief Check if a path starts with a POSIX-style root (/)
- * @param path The path string to check
- * @return true if the path starts with '/', false otherwise
- */
 static bool path_starts_with_posix_root(String path) {
     return !string_is_empty(path) && *string_begin(path) == '/';
 }
 
-/**
- * @brief Check if a path starts with a Windows-style root (C:\ or C:/)
- * @param path The path string to check
- * @return true if the path starts with a drive letter and colon, false otherwise
- */
 static bool path_starts_with_win32_root(String path) {
     if (path.size < 3) {
         return false;

@@ -1,12 +1,3 @@
-/**
- * @file bitset.c
- * @brief Implementation of bitset operations and utilities
- *
- * This file provides the core implementation of bitset manipulation functions
- * including testing, counting, searching, and modifying individual bits or
- * ranges of bits within a bitset structure.
- */
-
 #include "core_bits.h"
 #include "core_bitset.h"
 #include "core_diag.h"

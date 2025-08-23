@@ -1,13 +1,3 @@
-/**
- * @file format.c
- * @brief String formatting and parsing implementation
- *
- * This file implements a comprehensive string formatting system with support
- * for various data types, format specifiers, padding options, and advanced
- * formatting features. It provides both writing (sprintf-like) and reading
- * (scanf-like) functionality for strings, numbers, and other data types.
- */
-
 #include "core_alloc.h"
 #include "core_annotation.h"
 #include "core_array.h"
@@ -45,16 +35,6 @@ typedef struct {
     FormatReplOpt opt;
 } FormatRepl;
 
-/**
- * @brief Parse formatting options from a replacement string
- *
- * This function parses formatting options like padding direction and amount
- * from a format replacement string. Supports left padding (>), right padding (<),
- * and center padding (:) with optional numeric amounts.
- *
- * @param str The formatting option string to parse
- * @return Parsed formatting options structure
- */
 static FormatReplOpt format_replacement_parse_opt(String str) {
     str = format_read_whitespace(str, null);
     FormatReplOpt result = (FormatReplOpt) {
@@ -93,17 +73,6 @@ static FormatReplOpt format_replacement_parse_opt(String str) {
     return result;
 }
 
-/**
- * @brief Find the next format replacement placeholder in a string
- *
- * Searches for format replacement patterns like "{0}" or "{name:>10}" in the
- * input string and extracts the replacement information including position
- * and formatting options.
- *
- * @param str The string to search for format replacements
- * @param result Output structure to store the found replacement details
- * @return true if a replacement was found, false if no more replacements exist
- */
 static bool format_replacement_find(String str, FormatRepl* result) {
     const usize startIdx = string_find_first(str, string_lit("{"));
     if (sentinel_check(startIdx)) {
@@ -184,7 +153,6 @@ void format_write_arg(DynString *dynstr, const FormatArg *arg) {
     switch (arg->type) {
         case FormatArgType_End:
         case FormatArgType_Nop: {
-            // No formatting needed for None type
         } break;
 
         case FormatArgType_List: {
@@ -290,17 +258,6 @@ struct FormatF64Exp {
     f64 remaining;
 };
 
-/**
- * @brief Decompose a floating-point number into scientific notation parts
- *
- * This function converts a floating-point number into scientific notation by
- * determining the appropriate exponent and mantissa. It uses binary search
- * with precomputed powers of 10 to efficiently find the correct exponent.
- *
- * @param val The floating-point value to decompose (must be positive)
- * @param opts Formatting options containing exponent thresholds
- * @return Structure containing the exponent and normalized mantissa
- */
 static struct FormatF64Exp format_f64_decompose_exp(const f64 val, const FormatOptsFloat* opts) {
     static f64 binPow10[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 };
     static f64 negBinPow10[] = { 1e-1, 1e-2, 1e-4, 1e-8, 1e-16, 1e-32, 1e-64, 1e-128, 1e-256 };
@@ -314,7 +271,6 @@ static struct FormatF64Exp format_f64_decompose_exp(const f64 val, const FormatO
     i32 bit = 1 << i;
 
     if (val >= opts->expThresholdPos) {
-        // Handle large numbers requiring positive exponent
         for (; i >= 0; --i) {
             if (res.remaining >= binPow10[i]) {
                 res.remaining *= negBinPow10[i];
@@ -324,7 +280,6 @@ static struct FormatF64Exp format_f64_decompose_exp(const f64 val, const FormatO
             bit >>= 1;
         }
     } else if (val > 0 && val <= opts->expThresholdNeg) {
-        // Handle small numbers requiring negative exponent
         for (; i >= 0; --i) {
             if (res.remaining < negBinPow10PlusOne[i]) {
                 res.remaining *= binPow10[i];
@@ -345,18 +300,6 @@ struct FormatF64Parts {
     i16 expPart;
 };
 
-/**
- * @brief Decompose a floating-point number into integer and decimal parts
- *
- * This function breaks down a floating-point number into separate integer
- * and decimal components for formatting. It handles scientific notation
- * conversion and applies rounding to the decimal part based on precision
- * requirements.
- *
- * @param val The floating-point value to decompose (must be non-negative)
- * @param opts Formatting options specifying decimal precision
- * @return Structure containing integer part, decimal part, digit count, and exponent
- */
 static struct FormatF64Parts format_f64_decompose(const f64 val, const FormatOptsFloat* opts) {
     diag_assert(val >= 0.0);
     diag_assert(opts->minDecDigits <= opts->maxDecDigits);
@@ -372,14 +315,12 @@ static struct FormatF64Parts format_f64_decompose(const f64 val, const FormatOpt
     f64 remainder = (exp.remaining - (f64)res.intPart) * (f64)maxDecPart;
     res.decPart = (u64)remainder;
 
-    // Apply rounding to the decimal part
     remainder -= res.decPart;
     if (remainder >= 0.5) {
         ++res.decPart;
         if (res.decPart >= maxDecPart) {
             res.decPart = 0;
             ++res.intPart;
-            // Handle overflow in scientific notation
             if (res.expPart && res.intPart >= 10) {
                 res.expPart++;
                 res.intPart = 1;
@@ -387,7 +328,6 @@ static struct FormatF64Parts format_f64_decompose(const f64 val, const FormatOpt
         }
     }
 
-    // Remove trailing zeros while respecting minimum digits
     while (res.decPart % 10 == 0 && res.decDigits > opts->minDecDigits) {
         res.decPart /= 10;
         --res.decDigits;
@@ -460,7 +400,6 @@ void format_write_time_duration_pretty(DynString *dynstr, TimeDuration val) {
 
     const TimeDuration absVal = math_abs(val);
     usize i = 0;
-    // Find the largest unit where the value is >= 1.0
     for (; (i + 1) != array_elems(units) && absVal >= units[i + 1].val; ++i) 
         ;
 
@@ -525,7 +464,6 @@ void format_write_size_pretty(DynString* dynstr, const usize val) {
 
     u8 unit = 0;
     f64 scaledSize = val;
-    // Find the appropriate unit by dividing by 1024 until we get a value < 1024
     for (; scaledSize >= 1024.0 && unit != array_elems(units) - 1; ++unit) {
         scaledSize /= 1024.0;
     }
@@ -611,7 +549,6 @@ void format_write_char(DynString *dynstr, const u8 val, const FormatOptsText *op
     };
 
     if (opts->flags & FormatTextFlags_EscapeNonPrintAscii && !ascii_is_printable(val)) {
-        // Check for common escape sequences first
         for (size_t i = 0; i != array_elems(escapes); ++i) {
             if (escapes[i].byte == val) {
                 dynstring_append(dynstr, escapes[i].escapeSeq);
@@ -619,13 +556,11 @@ void format_write_char(DynString *dynstr, const u8 val, const FormatOptsText *op
             }
         }
 
-        // Fall back to hexadecimal escape for other non-printable bytes
         dynstring_append_char(dynstr, '\\');
         format_write_int(dynstr, val, .base = 16, .minDigits = 2);
         return;
     }
 
-    // Output printable characters as-is
     dynstring_append_char(dynstr, val);
 }
 
@@ -639,17 +574,6 @@ String format_read_whitespace(const String input, String *output) {
     return string_consume(input, idx);
 }
 
-/**
- * @brief Parse and consume a sign character from the beginning of a string
- *
- * This function reads an optional '+' or '-' sign from the start of a string
- * and advances the string past the sign if found. It outputs the sign value
- * as a multiplier (1 for positive, -1 for negative).
- *
- * @param input The input string to parse
- * @param output Pointer to store the sign value (1 or -1)
- * @return The remaining string after consuming the sign character
- */
 static String format_read_sign(String input, i8* output) {
     i8 sign = 1;
     if (LIKELY(!string_is_empty(input))) {

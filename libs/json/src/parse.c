@@ -1,12 +1,3 @@
-/**
- * @file parse.c
- * @brief JSON parsing implementation
- *
- * Implements recursive descent JSON parser that converts tokenized input into
- * JSON document structures. Handles nested objects and arrays with depth limiting
- * and comprehensive error reporting.
- */
-
 #include "core_array.h"
 #include "core_diag.h"
 
@@ -14,32 +5,20 @@
 
 #include "lex.h"
 
-/** @brief Maximum allowed nesting depth for JSON structures */
 #define json_depth_max 100
 
-/**
- * @brief Create a failure result with the specified error
- * @param _ERR_ Error code to include in the result
- * @return JsonResult structure configured as a failure
- */
 #define json_err(_ERR_)              \
     (JsonResult) {                   \
         .type = JsonResultType_Fail, \
         .error = (_ERR_)             \
     }
 
-/**
- * @brief Create a success result with the specified JSON value
- * @param _VAL_ JSON value handle to include in the result
- * @return JsonResult structure configured as a success
- */
 #define json_success(_VAL_)             \
     (JsonResult) {                      \
         .type = JsonResultType_Success, \
         .val = (_VAL_)                  \
     }
 
-/** @brief String representations of JSON parsing errors */
 static const String g_error_strs[] = {
     string_static("DuplicateField"),
     string_static("InvalidChar"),
@@ -65,25 +44,8 @@ String json_error_str(JsonError error) {
     return g_error_strs[error];
 }
 
-/**
- * @brief Parse a JSON value given its starting token
- * @param doc JSON document to add parsed value to
- * @param input Remaining input string after the start token
- * @param startToken First token of the value to parse
- * @param res Pointer to store parsing result
- * @return Remaining input after parsing the value
- */
 static String json_read_with_start_token(JsonDoc* doc, String input, JsonToken startToken, JsonResult* res);
 
-/**
- * @brief Parse a JSON array from input
- * @param doc JSON document to add parsed array to
- * @param input Input string positioned after opening bracket
- * @param res Pointer to store parsing result
- * @return Remaining input after parsing the array
- *
- * Parses array elements recursively and handles trailing commas (non-standard extension).
- */
 static String json_read_array(JsonDoc* doc, String input, JsonResult* res) {
     const JsonVal array = json_add_array(doc);
 
@@ -93,7 +55,6 @@ static String json_read_array(JsonDoc* doc, String input, JsonResult* res) {
     while (true) {
         input = json_lex(input, &token);
         if (token.type == JsonTokenType_BracketClose) {
-            // NOTE: Not according to spec but we accept trailing comma's
             goto Success;
         }
 
@@ -137,16 +98,6 @@ Success:
     return input;
 }
 
-/**
- * @brief Parse a JSON object from input
- * @param doc JSON document to add parsed object to
- * @param input Input string positioned after opening brace
- * @param res Pointer to store parsing result
- * @return Remaining input after parsing the object
- *
- * Parses object fields recursively, validates field name uniqueness,
- * and handles trailing commas (non-standard extension).
- */
 static String json_read_object(JsonDoc* doc, String input, JsonResult* res) {
     const JsonVal object = json_add_object(doc);
 

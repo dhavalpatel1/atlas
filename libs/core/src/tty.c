@@ -38,7 +38,7 @@ void tty_set_window_title(String title) {
     static const usize maxTitleLen = 128;
     diag_assert_msg(title.size <= maxTitleLen, "Tty window-title is too long, maximum is {} chars", fmt_int(maxTitleLen));
 
-    DynString str = dynstring_create_over(mem_stack(maxTitleLen * 2)); // Extra space for escape sequences
+    DynString str = dynstring_create_over(mem_stack(maxTitleLen * 2));
     tty_write_window_title_sequence(&str, title);
     file_write_sync(g_file_stdout, dynstring_view(&str));
 
@@ -88,7 +88,6 @@ void tty_write_style_sequence(DynString *str, TtyStyle style) {
         dynstring_append_char(str, ';');
     }
 
-    // Handle sequence termination - replace trailing semicolon or append 'm'
     String view = dynstring_view(str);
     if (view.size > 0) {
         u8* last = string_last(view);
@@ -98,7 +97,6 @@ void tty_write_style_sequence(DynString *str, TtyStyle style) {
             dynstring_append_char(str, 'm');
         }
     } else {
-        // This shouldn't happen since we always append at least "\33[" above
         dynstring_append_char(str, 'm');
     }
 }

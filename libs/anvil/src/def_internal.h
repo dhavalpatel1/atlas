@@ -1,11 +1,3 @@
-/**
- * @file def_internal.h
- * @brief Internal Anvil definition structures
- *
- * This header defines the internal structures used for Anvil test
- * definition management including spec storage and definition metadata.
- */
-
 #pragma once
 
 #include "core_dynarray.h"

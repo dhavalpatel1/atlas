@@ -1,24 +1,12 @@
-/**
- * @file write.c
- * @brief JSON serialization implementation
- *
- * Implements JSON value serialization to text format with support for both
- * compact and pretty-printed output. Handles proper escaping of strings,
- * numeric formatting, and recursive structure traversal.
- */
-
 #include "core_diag.h"
 #include "core_format.h"
 
 #include "json_write.h"
 
-/**
- * @brief Internal state for JSON writing operations
- */
 typedef struct {
-    const JsonDoc* doc;         /**< JSON document being serialized */
-    const JsonWriteOpts* opts;  /**< Writing options (null for compact output) */
-    u32 indent;                 /**< Current indentation level */
+    const JsonDoc* doc;
+    const JsonWriteOpts* opts;
+    u32 indent;
 } JsonWriteState;
 
 static void json_state_write_string(JsonWriteState*, DynString*, String);

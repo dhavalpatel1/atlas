@@ -53,7 +53,7 @@ spec(time) {
 
     it("can retrieve the current real-time from the real-clock") {
         const TimeDate today = time_real_to_date(time_real_clock());
-        // If this code ever runs after 2200 it would be amazing, but i wont be alive to see it.
+        
         anvil(today.year >= 2021 && today.year < 2200);
     }
 

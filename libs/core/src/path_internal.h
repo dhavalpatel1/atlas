@@ -1,11 +1,3 @@
-/**
- * @file path_internal.h
- * @brief Internal path manipulation platform abstraction layer interface
- *
- * This header defines the platform abstraction layer interface for path
- * operations including working directory and executable path retrieval.
- * Platform-specific implementations provide the actual functionality.
- */
 
 #pragma once
 

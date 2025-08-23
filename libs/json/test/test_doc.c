@@ -47,7 +47,7 @@ spec(doc) {
 
         anvil_eq_int(json_type(doc, val), JsonType_Array);
         anvil_eq_int(json_elem_count(doc, val), 0);
-        anvil(sentinel_check(json_elem_begin(doc, val))); // Check that there is no first element.
+        anvil(sentinel_check(json_elem_begin(doc, val)));
     }
 
     it("can store arrays with a single element") {
@@ -63,7 +63,7 @@ spec(doc) {
         anvil_eq_int(json_type(doc, val), JsonType_Array);
         anvil_eq_int(json_elem_count(doc, val), 1);
         anvil_eq_int(json_elem_begin(doc, val), elem);
-        anvil(sentinel_check(json_elem_next(doc, elem))); // Check that there is no second element.
+        anvil(sentinel_check(json_elem_next(doc, elem)));
     }
 
     it("can lookup array elements by index") {
@@ -117,7 +117,6 @@ spec(doc) {
         anvil_eq_int(json_type(doc, val), JsonType_Object);
         anvil_eq_int(json_field_count(doc, val), 0);
 
-        // Check that there is no first field.
         anvil_eq_string(json_field_begin(doc, val).name, string_empty);
         anvil(sentinel_check(json_field_begin(doc, val).value));
     }
@@ -138,7 +137,7 @@ spec(doc) {
         anvil_eq_string(json_field_begin(doc, val).name, string_lit("a"));
         anvil_eq_int(json_field_begin(doc, val).value, field);
         anvil(
-            sentinel_check(json_field_next(doc, field).value)); // Check that there is no second field.
+            sentinel_check(json_field_next(doc, field).value));
     }
 
     it("can lookup object fields by name") {

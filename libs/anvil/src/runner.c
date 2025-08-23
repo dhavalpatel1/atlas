@@ -1,12 +1,3 @@
-/**
- * @file runner.c
- * @brief Implementation of Anvil test runner and execution engine
- *
- * This file implements the core test runner functionality including test discovery,
- * parallel execution scheduling, output handling, and result aggregation for the
- * Anvil testing framework.
- */
-
 #include "core_alloc.h"
 #include "core_array.h"
 #include "core_file.h"
@@ -20,38 +11,18 @@
 #include "output_pretty.h"
 #include "spec_internal.h"
 
-/**
- * @brief Context structure for managing test run state and outputs
- *
- * Contains output handlers, counters, and coordination data needed
- * during test execution.
- */
 typedef struct {
-    AnvilOutput** outputs;     ///< Array of output handlers
-    usize outputsCount;        ///< Number of output handlers
-    i64 numFailedTests;        ///< Atomic counter of failed tests
+    AnvilOutput** outputs;
+    usize outputsCount;
+    i64 numFailedTests;
 } AnvilRunContext;
 
-/**
- * @brief Data structure passed to individual test tasks
- *
- * Contains all information needed for a single test execution task
- * including the spec, test definition, and run context.
- */
 typedef struct {
-    const AnvilSpec* spec;     ///< The specification containing the test
-    const AnvilTest* test;     ///< The specific test to execute
-    AnvilRunContext* ctx;      ///< The shared run context
+    const AnvilSpec* spec;
+    const AnvilTest* test;
+    AnvilRunContext* ctx;
 } AnvilTestData;
 
-/**
- * @brief Task function executed for each individual test
- *
- * Executes a single test, determines pass/fail status, notifies all output
- * handlers of the result, and updates the failure counter atomically.
- *
- * @param context Pointer to AnvilTestData containing test information
- */
 static void anvil_test_task(void* context) {
     AnvilTestData* data = context;
 
@@ -70,17 +41,6 @@ static void anvil_test_task(void* context) {
     anvil_result_destroy(result);
 }
 
-/**
- * @brief Execute all tests in the provided test definition
- *
- * Discovers tests from all registered specifications, schedules them for parallel
- * execution, handles focus and skip flags, and aggregates results. Manages output
- * handlers and provides comprehensive timing and result reporting.
- *
- * @param check The AnvilDef containing registered test specifications
- * @param flags Runtime flags controlling test execution behavior
- * @return AnvilResultType_Pass if all tests passed, AnvilResultType_Fail otherwise
- */
 AnvilResultType anvil_run(AnvilDef* check, const AnvilRunFlags flags) {
     const TimeSteady startTime = time_steady_clock();
 

@@ -1,11 +1,3 @@
-/**
- * @file diag_pal.c
- * @brief Platform abstraction layer implementation for diagnostic system
- *
- * This file provides the unified implementation of platform-specific diagnostic
- * functions by including the appropriate platform-specific implementation based
- * on compile-time platform detection.
- */
 
 #include "diag_internal.h"
 

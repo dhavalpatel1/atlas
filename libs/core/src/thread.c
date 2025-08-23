@@ -1,13 +1,3 @@
-/**
- * @file thread.c
- * @brief Cross-platform threading implementation
- *
- * This file implements thread management, synchronization primitives, and
- * atomic operations. It provides a unified threading API that works across
- * different platforms through platform abstraction layers, including thread
- * creation, mutexes, condition variables, and atomic operations.
- */
-
 #include "core_alloc.h"
 #include "core_annotation.h"
 #include "core_init.h"
@@ -17,45 +7,24 @@
 #include "init_internal.h"
 #include "thread_internal.h"
 
-/**
- * @brief Data structure passed to new threads
- *
- * Contains all the information needed to properly initialize and run
- * a new thread, including the user routine and thread identification.
- */
 typedef struct {
-    String threadName;        /**< Name of the thread for debugging */
-    ThreadRoutine userRoutine; /**< User function to execute */
-    void* userData;           /**< User data to pass to the routine */
+    String threadName;
+    ThreadRoutine userRoutine;
+    void* userData;
 } ThreadRunData;
 
-/**
- * @brief Internal thread entry point that handles initialization and cleanup
- *
- * This function serves as the entry point for all new threads. It performs
- * necessary initialization (core subsystems, thread naming), runs the user's
- * routine, and handles cleanup when the thread exits.
- *
- * @param data Pointer to ThreadRunData containing thread information
- * @return Platform-specific thread return value (typically null)
- */
 static thread_pal_rettype thread_runner(void* data) {
     ThreadRunData* runData = (ThreadRunData*)data;
 
-    // Initialize engine subsystems for this thread
     core_init();
 
-    // Set up thread-local identification and naming
     g_thread_name = runData->threadName;
     thread_pal_set_name(g_thread_name);
 
-    // Execute the user's thread routine
     runData->userRoutine(runData->userData);
 
-    // Clean up engine resources
     core_teardown();
 
-    // Free the thread data allocation
     string_free(g_alloc_heap, runData->threadName);
     alloc_free_t(g_alloc_heap, runData);
 

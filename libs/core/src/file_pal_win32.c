@@ -1,11 +1,3 @@
-/**
- * @file file_pal_win32.c
- * @brief Windows platform abstraction layer for file operations
- *
- * This file implements the Windows-specific file system operations including
- * file creation, reading, writing, deletion, and directory management.
- * It translates between the cross-platform file API and Windows API calls.
- */
 
 #include "core_alloc.h"
 #include "core_diag.h"
@@ -37,11 +29,8 @@ typedef struct {
     void* addr;
 } FileMapping;
 
-/** @brief Standard input file handle (initialized at runtime) */
 File* g_file_stdin;
-/** @brief Standard output file handle (initialized at runtime) */
 File* g_file_stdout;
-/** @brief Standard error file handle (initialized at runtime) */
 File* g_file_stderr;
 
 void file_pal_init() {
@@ -67,15 +56,6 @@ void file_pal_init() {
     }
 }
 
-/**
- * @brief Convert Windows error codes to cross-platform FileResult codes
- *
- * This function maps Windows-specific error codes from GetLastError() to the
- * platform-independent FileResult enumeration for consistent error
- * handling across different operating systems.
- *
- * @return FileResult code corresponding to the current Windows error
- */
 static FileResult fileresult_from_lasterror() {
     switch (GetLastError()) {
         case ERROR_ACCESS_DENIED: {

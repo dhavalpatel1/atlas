@@ -1,12 +1,3 @@
-/**
- * @file app_internal.h
- * @brief Internal CLI application structures and definitions
- *
- * This header defines the internal structures for CLI application management
- * including option types, command-line argument handling, and application
- * configuration storage.
- */
-
 #pragma once
 
 #include "core_dynarray.h"

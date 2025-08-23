@@ -1,11 +1,3 @@
-/**
- * @file tty_internal.h
- * @brief Internal terminal/TTY platform abstraction layer interface
- *
- * This header defines the platform abstraction layer interface for terminal
- * operations including TTY detection, terminal size queries, and terminal
- * setup/teardown operations across different platforms.
- */
 
 #pragma once
 

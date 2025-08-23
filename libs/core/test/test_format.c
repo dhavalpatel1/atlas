@@ -285,7 +285,7 @@ spec(format) {
             {42 * usize_kibibyte, string_lit("42KiB")},
             {42 * usize_mebibyte, string_lit("42MiB")},
             {3 * usize_gibibyte, string_lit("3GiB")},
-            #if uptr_max == u64_max // 64 bit only sizes.
+            #if uptr_max == u64_max 
             {42 * usize_gibibyte, string_lit("42GiB")},
             {42 * usize_tebibyte, string_lit("42TiB")},
             {42 * usize_pebibyte, string_lit("42PiB")},

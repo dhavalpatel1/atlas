@@ -1,12 +1,3 @@
-/**
- * @file file_pal_linux.c
- * @brief Linux platform abstraction layer for file operations
- *
- * This file implements the Linux-specific file system operations including
- * file creation, reading, writing, deletion, and directory management.
- * It translates between the cross-platform file API and Linux system calls.
- */
-
 #include "core_alloc.h"
 #include "core_diag.h"
 #include "core_dynstring.h"
@@ -28,35 +19,17 @@
 #include "file_internal.h"
 #include "time_internal.h"
 
-/**
- * @brief Internal structure for managing memory-mapped files on Linux
- * 
- * Stores the memory mapping information needed for proper cleanup
- * when the file is destroyed or the mapping is released.
- */
 typedef struct {
-    void* addr;     /**< Memory address of the mapped region */
-    usize size;     /**< Size of the mapped region in bytes */
+    void* addr;
+    usize size;
 } FileMapping;
 
-/** @brief Standard input file handle */
 File* g_file_stdin = &(File){ .handle = 0, .access = FileAccess_Read };
 
-/** @brief Standard output file handle */
 File* g_file_stdout = &(File){ .handle = 1, .access = FileAccess_Write };
 
-/** @brief Standard error file handle */
 File* g_file_stderr = &(File){ .handle = 2, .access = FileAccess_Write };
 
-/**
- * @brief Convert Linux errno values to cross-platform FileResult codes
- *
- * This function maps Linux-specific error codes from errno to the
- * platform-independent FileResult enumeration for consistent error
- * handling across different operating systems.
- *
- * @return FileResult code corresponding to the current errno value
- */
 static FileResult fileresult_from_errno() {
     switch (errno) {
         case EACCES:
@@ -118,7 +91,6 @@ FileResult file_create(Allocator* allocator, String path, FileMode mode, FileAcc
 
     switch (mode) {
         case FileMode_Open: {
-            /* No additional flags for simple open */
         } break;
 
         case FileMode_Append: {
@@ -256,15 +228,6 @@ FileResult file_seek_sync(File* file, usize position) {
     return FileResult_Success;
 }
 
-/**
- * @brief Get file metadata and statistics using Linux fstat()
- * @param file File handle to query
- * @return FileInfo structure with file metadata
- * 
- * Uses the Linux fstat() system call to retrieve file metadata including
- * size and timestamps. Converts Linux-specific timespec structures to
- * cross-platform TimeReal format.
- */
 FileInfo file_stat_sync(File* file) {
     struct stat statOutput;
     const int res = fstat(file->handle, &statOutput);
@@ -295,27 +258,11 @@ FileResult file_delete_sync(String path) {
     return FileResult_Success;
 }
 
-/**
- * @brief Memory-map a file using Linux mmap() system call
- * @param file File handle to map
- * @param output Pointer to receive the mapped memory region as a String view
- * @return FileResult indicating success or failure
- * 
- * Creates a memory mapping of the entire file using the Linux mmap() system call.
- * The protection flags are determined by the file's access permissions:
- * - Read access enables PROT_READ
- * - Write access enables PROT_WRITE
- * 
- * Uses MAP_SHARED so that changes are visible to other processes and are
- * written back to the file. The mapping is automatically cleaned up when
- * the file is destroyed.
- */
 FileResult file_map(File* file, String* output) {
     diag_assert_msg(!file->mapping, "File is already mapped");
 
     const usize size = file_stat_sync(file).size;
 
-    // Determine memory protection flags based on file access permissions
     int prot = 0;
     if (file->access & FileAccess_Read) {
         prot |= PROT_READ;
@@ -325,13 +272,11 @@ FileResult file_map(File* file, String* output) {
         prot |= PROT_WRITE;
     }
 
-    // Create the memory mapping
     void* addr = mmap(null, size, prot, MAP_SHARED, file->handle, 0);
     if (UNLIKELY(!addr)) {
         return fileresult_from_errno();
     }
 
-    // Allocate tracking structure for cleanup
     file->mapping = alloc_alloc_t(file->allocator, FileMapping);
     if (UNLIKELY(!file->mapping)) {
         const int res = munmap(addr, size);

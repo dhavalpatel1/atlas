@@ -1,13 +1,3 @@
-/**
- * @file dynarray.c
- * @brief Dynamic array implementation with automatic resizing and memory management.
- *
- * This file implements a generic dynamic array data structure that automatically
- * resizes as elements are added or removed. It supports both managed (with allocator)
- * and unmanaged (over existing memory) modes, provides efficient insertion and removal
- * operations, and includes utilities for sorting and shuffling array contents.
- */
-
 #include "core_annotation.h"
 #include "core_bits.h"
 #include "core_compare.h"
@@ -50,7 +40,6 @@ DynArray dynarray_create_over(Mem memory, u16 stride) {
 void dynarray_destroy(DynArray *array) {
     diag_assert(array);
     if (array->alloc && LIKELY(mem_valid(array->data))) {
-        // Having a allocator pointer (and a valid allocation) means we should free the backing memory.
         alloc_free(array->alloc, array->data);
     }
 }
@@ -61,16 +50,6 @@ FORCE_INLINE usize dynarray_size(const DynArray* array) {
     return array->size;
 }
 
-/**
- * @brief Grows the dynamic array's capacity to accommodate more elements.
- *
- * This internal function reallocates the array's memory to a larger size when
- * the current capacity is insufficient. It uses power-of-2 sizing to minimize
- * the number of reallocations needed as the array grows.
- *
- * @param array The dynamic array to grow
- * @param size The minimum number of elements that need to fit
- */
 static void dynarray_resize_grow(DynArray* array, const usize size) {
     diag_assert_msg(array->alloc, "DynArray without an allocator ran out of memory");
 

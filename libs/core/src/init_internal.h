@@ -1,11 +1,3 @@
-/**
- * @file init_internal.h
- * @brief Internal initialization system interface
- *
- * This header defines the internal initialization functions for various
- * core subsystems including allocators, time, file system, threading,
- * signals, and other platform-specific components.
- */
 
 #pragma once
 

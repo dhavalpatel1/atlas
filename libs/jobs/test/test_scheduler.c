@@ -27,12 +27,10 @@ spec(scheduler) {
 
         DynArray jobIds = dynarray_create_t(g_alloc_scratch, JobId, numRuns);
 
-        // Start the graph multiple times.
         for (usize i = 0; i != numRuns; ++i) {
             *dynarray_push_t(&jobIds, JobId) = jobs_scheduler_run(jobGraph);
         }
 
-        // Wait for all jobs to finish.
         dynarray_for_t(&jobIds, JobId, id, {
             jobs_scheduler_wait_help(*id);
             anvil(jobs_scheduler_is_finished(*id));

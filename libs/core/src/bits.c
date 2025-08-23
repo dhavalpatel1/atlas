@@ -1,13 +1,3 @@
-/**
- * @file bits.c
- * @brief Bit manipulation and alignment utilities implementation.
- *
- * This file provides efficient bit manipulation functions including population count,
- * leading/trailing zero counting, power-of-two operations, hash functions, and memory
- * alignment utilities. It uses compiler intrinsics for optimal performance across
- * different platforms (MSVC and GCC/Clang) and provides both 32-bit and 64-bit variants.
- */
-
 #include "core_bits.h"
 #include "core_diag.h"
 #include "core_memory.h"
