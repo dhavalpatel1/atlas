@@ -1,7 +1,7 @@
 
 #include "diag_internal.h"
 
-#ifdef ATLAS_LINUX
+#if defined(ATLAS_LINUX)
 #include "diag_pal_linux.c"
 #elif defined(ATLAS_WIN32)
 #include "diag_pal_win32.c"

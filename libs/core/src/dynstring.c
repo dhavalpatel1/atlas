@@ -43,3 +43,7 @@ FORCE_INLINE void dynstring_append_chars(DynString *str, u8 c, usize amount) {
 FORCE_INLINE void dynstring_insert_chars(DynString *str, u8 val, usize idx, usize amount) {
     mem_set(dynarray_insert(str, idx, amount), val);
 }
+
+FORCE_INLINE String dynstring_push(DynString* str, usize amount) {
+    return dynarray_push(str, amount);
+}

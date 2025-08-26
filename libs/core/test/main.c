@@ -21,6 +21,7 @@ static int run_tests(const bool outputPassingTests) {
     register_spec(anvil, dynarray);
     register_spec(anvil, dynbitset);
     register_spec(anvil, dynstring);
+    register_spec(anvil, env);
     register_spec(anvil, file);
     register_spec(anvil, format);
     register_spec(anvil, macro);

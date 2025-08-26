@@ -8,3 +8,5 @@
 String path_pal_workingdir(Mem outputBuffer);
 
 String path_pal_executable(Mem outputBuffer);
+
+String path_pal_tempdir(Mem outputBuffer);

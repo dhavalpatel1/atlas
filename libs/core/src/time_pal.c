@@ -1,4 +1,4 @@
-#ifdef ATLAS_LINUX
+#if defined(ATLAS_LINUX)
 #include "time_pal_linux.c"
 #elif defined(ATLAS_WIN32)
 #include "time_pal_win32.c"

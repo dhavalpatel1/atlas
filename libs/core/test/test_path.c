@@ -118,4 +118,19 @@ spec(path) {
 
         dynstring_destroy(&string);
     }
+
+    it("can retrieve the executable path") {
+        anvil(!string_is_empty(g_path_executable));
+        anvil(path_is_absolute(g_path_executable));
+    }
+
+    it("can retrieve the working-directory path") {
+        anvil(!string_is_empty(g_path_workingdir));
+        anvil(path_is_absolute(g_path_workingdir));
+    }
+
+    it("can retrieve the system temp path") {
+        anvil(!string_is_empty(g_path_tempdir));
+        anvil(path_is_absolute(g_path_tempdir));
+    }
 }

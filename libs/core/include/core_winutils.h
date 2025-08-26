@@ -2,7 +2,7 @@
 
 #include "core_string.h"
 
-#ifdef ATLAS_WIN32
+#if defined(ATLAS_WIN32)
 
 usize winutils_to_widestr_size(String input);
 

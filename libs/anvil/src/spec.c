@@ -42,7 +42,7 @@ static AnvilTestContext* anvil_spec_test_exec(AnvilSpecContext* ctx, AnvilTest t
 static bool anvil_assert_handler(String msg, const SourceLoc source, void* context) {
     anvil_report_error(context, msg, source);
 
-    return true;
+    anvil_finish(context);
 }
 
 bool anvil_visit_setup(AnvilSpecContext* ctx) {

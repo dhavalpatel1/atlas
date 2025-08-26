@@ -4,14 +4,14 @@
 
 #include <immintrin.h>
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
 #include "intrin.h"
 #pragma intrinsic(_BitScanForward)
 #pragma intrinsic(_BitScanReverse)
 #endif
 
 FORCE_INLINE u8 bits_popcnt_32(const u32 mask) {
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     return __popcnt(mask);
 #else
     return __builtin_popcount(mask);
@@ -19,7 +19,7 @@ FORCE_INLINE u8 bits_popcnt_32(const u32 mask) {
 }
 
 FORCE_INLINE u8 bits_popcnt_64(const u64 mask) {
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     return __popcnt64(mask);
 #else
     return __builtin_popcountll(mask);
@@ -31,7 +31,7 @@ FORCE_INLINE u8 bits_ctz_32(const u32 mask) {
         return 32;
     }
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     unsigned long result;
     _BitScanForward(&result, mask);
 
@@ -46,7 +46,7 @@ FORCE_INLINE u8 bits_ctz_64(const u64 mask) {
         return 64;
     }
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     unsigned long result;
     _BitScanForward64(&result, mask);
 
@@ -61,7 +61,7 @@ FORCE_INLINE u8 bits_clz_32(const u32 mask) {
         return 32u;
     }
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     unsigned long result;
     _BitScanReverse(&result, mask);
 
@@ -76,7 +76,7 @@ FORCE_INLINE u8 bits_clz_64(const u64 mask) {
         return 64u;
     }
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
     unsigned long result;
     _BitScanReverse64(&result, mask);
 

@@ -1,4 +1,5 @@
 #include "core_file.h"
+#include "core_path.h"
 #include "core_time.h"
 
 #include "anvil_spec.h"
@@ -17,20 +18,20 @@ static void test_file_verify_data(AnvilTestContext* _testCtx, String input) {
 
 spec(file) {
 
-    File*     file   = null;
+    File*     tmpFile   = null;
     DynString buffer = {0};
 
     setup() {
-        file_temp(g_alloc_heap, &file);
+        file_temp(g_alloc_heap, &tmpFile);
         buffer = dynstring_create(g_alloc_page, usize_kibibyte * 4);
     }
 
     it("can read-back content that was written") {
 
-        anvil_eq_int(file_write_sync(file, string_lit("Hello World!")), FileResult_Success);
-        anvil_eq_int(file_seek_sync(file, 0), FileResult_Success);
+        anvil_eq_int(file_write_sync(tmpFile, string_lit("Hello World!")), FileResult_Success);
+        anvil_eq_int(file_seek_sync(tmpFile, 0), FileResult_Success);
 
-        anvil_eq_int(file_read_sync(file, &buffer), FileResult_Success);
+        anvil_eq_int(file_read_sync(tmpFile, &buffer), FileResult_Success);
         anvil_eq_string(dynstring_view(&buffer), string_lit("Hello World!"));
     }
 
@@ -38,49 +39,94 @@ spec(file) {
         const usize testDataSize = 2345;
 
         test_file_write_data(&buffer, testDataSize);
-        anvil_eq_int(file_write_sync(file, dynstring_view(&buffer)), FileResult_Success);
-        anvil_eq_int(file_seek_sync(file, 0), FileResult_Success);
+        anvil_eq_int(file_write_sync(tmpFile, dynstring_view(&buffer)), FileResult_Success);
+        anvil_eq_int(file_seek_sync(tmpFile, 0), FileResult_Success);
 
         dynstring_clear(&buffer);
-        anvil_eq_int(file_read_to_end_sync(file, &buffer), FileResult_Success);
+        anvil_eq_int(file_read_to_end_sync(tmpFile, &buffer), FileResult_Success);
 
         anvil_eq_int(buffer.size, testDataSize);
         test_file_verify_data(_testCtx, dynstring_view(&buffer));
     }
 
     it("can retrieve the file size") {
-        anvil_eq_int(file_stat_sync(file).size, 0);
+        anvil_eq_int(file_stat_sync(tmpFile).size, 0);
 
-        file_write_sync(file, string_lit("Hello World!"));
-        anvil_eq_int(file_stat_sync(file).size, 12);
+        file_write_sync(tmpFile, string_lit("Hello World!"));
+        anvil_eq_int(file_stat_sync(tmpFile).size, 12);
+    }
+
+    it("can check the file-type of regular files") {
+        anvil_eq_int(file_stat_sync(tmpFile).type, FileType_Regular);
+    }
+
+    it("can check the file-type of directories") {
+        File* workingDir = null;
+        anvil_eq_int(
+            file_create(g_alloc_heap, g_path_workingdir, FileMode_Open, FileAccess_None, &workingDir),
+            FileResult_Success);
+
+        if (workingDir) {
+            anvil_eq_int(file_stat_sync(workingDir).type, FileType_Directory);
+            file_destroy(workingDir);
+        }
     }
 
     it("can retrieve the last access and last modification times") {
-        const FileInfo info = file_stat_sync(file);
+        const FileInfo info = file_stat_sync(tmpFile);
         anvil(time_real_duration(info.accessTime, time_real_clock()) < time_minute);
         anvil(time_real_duration(info.modTime, time_real_clock()) < time_minute);
     }
 
     it("can read file contents through a memory map") {
-        file_write_sync(file, string_lit("Hello World!"));
+        file_write_sync(tmpFile, string_lit("Hello World!"));
 
         String mapping;
-        anvil_eq_int(file_map(file, &mapping), FileResult_Success);
+        anvil_eq_int(file_map(tmpFile, &mapping), FileResult_Success);
         anvil_eq_string(mapping, string_lit("Hello World!"));
     }
 
     it("can write file contents through a memory map") {
-        file_write_sync(file, string_lit("            "));
+        file_write_sync(tmpFile, string_lit("            "));
 
         String mapping;
-        anvil_eq_int(file_map(file, &mapping), FileResult_Success);
+        anvil_eq_int(file_map(tmpFile, &mapping), FileResult_Success);
         mem_cpy(mapping, string_lit("Hello World!"));
 
         anvil_eq_string(mapping, string_lit("Hello World!"));
     }
 
+    it("can check if a file exists") {
+        File* nonExistingFile = null;
+        anvil_eq_int(
+            file_create(
+                g_alloc_heap,
+                string_lit("path_to_non_existent_file_42"),
+                FileMode_Open,
+                FileAccess_Read,
+                &nonExistingFile),
+            FileResult_NotFound);
+        anvil(nonExistingFile == null);
+    }
+
+    it("can read its own executable") {
+        File* ownExecutable = null;
+        anvil_eq_int(
+            file_create(
+                g_alloc_heap, g_path_executable, FileMode_Open, FileAccess_Read, &ownExecutable),
+            FileResult_Success);
+        anvil(ownExecutable != null);
+
+        anvil_eq_int(file_read_sync(ownExecutable, &buffer), FileResult_Success);
+        anvil(buffer.size > 0);
+
+        if (ownExecutable) {
+            file_destroy(ownExecutable);
+        }
+    }
+
     teardown() {
-        file_destroy(file);
+        file_destroy(tmpFile);
         dynstring_destroy(&buffer);
     }
 }

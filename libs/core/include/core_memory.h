@@ -41,7 +41,7 @@ typedef struct {
     }                                                                                     \
 }                                                                                         \
 
-#ifdef ATLAS_MSVC
+#if defined(ATLAS_MSVC)
 #define mem_stack(_SIZE_) mem_create(_alloca(_SIZE_), _SIZE_)
 #else
 #define mem_stack(_SIZE_) mem_create(__builtin_alloca(_SIZE_), _SIZE_)

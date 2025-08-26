@@ -2,7 +2,7 @@
 
 #include "core_file.h"
 
-#ifdef ATLAS_LINUX
+#if defined(ATLAS_LINUX)
 typedef int FileHandle;
 #elif defined(ATLAS_WIN32)
 typedef void* FileHandle;

@@ -138,7 +138,7 @@ void format_write_formatted(DynString *dynstr, String format, const FormatArg* a
 }
 
 String format_write_formatted_scratch(String format, const FormatArg *args) {
-    Mem scratchMem = alloc_alloc(g_alloc_scratch, usize_kibibyte * 2, 1);
+    Mem scratchMem = alloc_alloc(g_alloc_scratch, usize_kibibyte * 8, 1);
     DynString str = dynstring_create_over(scratchMem);
 
     format_write_formatted(&str, format, args);

@@ -1,5 +1,6 @@
 #include "core_diag.h"
 #include "core_dynstring.h"
+#include "core_env.h"
 #include "core_memory.h"
 #include "core_path.h"
 #include "core_string.h"
@@ -9,19 +10,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+static String path_canonize_to_output_buffer(Mem outputBuffer, String path) {
+    DynString writer = dynstring_create_over(outputBuffer);
+    path_canonize(&writer, path);
+
+    String result = dynstring_view(&writer);
+    dynstring_destroy(&writer);
+
+    return result;
+}
+
 String path_pal_workingdir(Mem outputBuffer) {
     Mem tmp = mem_stack(path_pal_max_size);
     if (!getcwd(tmp.ptr, tmp.size)) {
         diag_crash_msg("getcwd() failed");
     }
 
-    DynString writer = dynstring_create_over(outputBuffer);
-    path_canonize(&writer, string_from_null_term(tmp.ptr));
-
-    String result = dynstring_view(&writer);
-    dynstring_destroy(&writer);
-
-    return result;
+    return path_canonize_to_output_buffer(outputBuffer, string_from_null_term(tmp.ptr));
 }
 
 String path_pal_executable(Mem outputBuffer) {
@@ -30,11 +35,22 @@ String path_pal_executable(Mem outputBuffer) {
         diag_crash_msg("failed to resolve '/proc/self/exe'");
     }
 
-    DynString writer = dynstring_create_over(outputBuffer);
-    path_canonize(&writer, string_from_null_term(tmp.ptr));
+    return path_canonize_to_output_buffer(outputBuffer, string_from_null_term(tmp.ptr));
+}
 
-    String result = dynstring_view(&writer);
-    dynstring_destroy(&writer);
+String path_pal_tempdir(Mem outputBuffer) {
+    DynString tmpWritter = dynstring_create_over(mem_stack(PATH_MAX));
+    String result;
+
+    if (env_var(string_lit("TMPDIR"), &tmpWritter)) {
+        result = path_canonize_to_output_buffer(outputBuffer, dynstring_view(&tmpWritter));
+        goto Ret;
+    }
+
+    result = path_canonize_to_output_buffer(outputBuffer, string_lit("/tmp"));
+
+Ret:
+    dynstring_destroy(&tmpWritter);
 
     return result;
 }

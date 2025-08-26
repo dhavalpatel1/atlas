@@ -34,12 +34,20 @@ typedef enum {
 } FileMode;
 
 typedef enum {
-    FileAccess_Read  = 1 << 0,
+    FileAccess_None = 0,
+    FileAccess_Read = 1 << 0,
     FileAccess_Write = 1 << 1,
 } FileAccessFlags;
 
+typedef enum {
+    FileType_Regular,
+    FileType_Directory,
+    FileType_Unknown,
+} FileType;
+
 typedef struct {
     usize size;
+    FileType type;
     TimeReal accessTime;
     TimeReal modTime;
 } FileInfo;

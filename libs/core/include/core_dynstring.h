@@ -25,3 +25,5 @@ void dynstring_append_char(DynString* str, u8 c);
 void dynstring_append_chars(DynString* str, u8 c, usize amount);
 
 void dynstring_insert_chars(DynString* str, u8 val, usize idx, usize amount);
+
+String dynstring_push(DynString* str, usize amount);

@@ -6,6 +6,8 @@ extern String g_path_workingdir;
 
 extern String g_path_executable;
 
+extern String g_path_tempdir;
+
 bool path_is_absolute(String path);
 
 bool path_is_root(String path);

@@ -4,7 +4,7 @@
 #include "core_types.h"
 #include "core_winutils.h"
 
-#ifdef ATLAS_WIN32
+#if defined(ATLAS_WIN32)
 #include <Windows.h>
 
 usize winutils_to_widestr_size(String input) {

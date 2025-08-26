@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ATLAS_CLANG
+#if defined(ATLAS_CLANG)
     #define alignof(_TYPE_) ((u32) __alignof__(_TYPE_))
 #elif defined(ATLAS_GCC)
     #define alignof(_TYPE_) ((u32) __alignof__(_TYPE_))
