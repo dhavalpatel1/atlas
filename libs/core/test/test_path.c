@@ -1,5 +1,7 @@
+#include "core_alloc.h"
 #include "core_array.h"
 #include "core_path.h"
+#include "core_rng.h"
 
 #include "anvil_spec.h"
 
@@ -117,6 +119,15 @@ spec(path) {
         anvil_eq_string(dynstring_view(&string), string_lit("Hello/How/You/Doing?"));
 
         dynstring_destroy(&string);
+    }
+
+    it("can generate a random file-name") {
+        static const u64 seed = 42;
+        Allocator* alloc = alloc_bump_create_stack(256);
+        Rng* rng = rng_create_xorwow(alloc, seed);
+
+        anvil_eq_string(path_random_name_scratch(rng, string_empty), string_lit("nkOZrR4b15bJ"));
+        anvil_eq_string(path_random_name_scratch(rng, string_lit("hello")), string_lit("hello_ecfcmkK1mPyR"));
     }
 
     it("can retrieve the executable path") {

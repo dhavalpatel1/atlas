@@ -202,7 +202,7 @@ FileResult file_read_sync(File* file, DynString* dynstr) {
         const ssize_t res = read(file->handle, readBuffer.ptr, readBuffer.size);
         if (res > 0) {
             dynstring_append(dynstr, mem_slice(readBuffer, 0, res));
-            
+
             return FileResult_Success;
         }
 
@@ -266,6 +266,22 @@ FileResult file_delete_sync(String path) {
     return FileResult_Success;
 }
 
+FileResult file_delete_dir_sync(String path) {
+    if (path.size >= PATH_MAX) {
+        return FileResult_PathTooLong;
+    }
+
+    Mem pathBuffer = mem_stack(PATH_MAX);
+    mem_cpy(pathBuffer, path);
+    *mem_at_u8(pathBuffer, path.size) = '\0';
+
+    if (rmdir((const char*)pathBuffer.ptr)) {
+        return fileresult_from_errno();
+    }
+
+    return FileResult_Success;
+}
+
 FileResult file_map(File* file, String* output) {
     diag_assert_msg(!file->mapping, "File is already mapped");
 
@@ -303,4 +319,19 @@ FileResult file_map(File* file, String* output) {
     *output = mem_create(addr, size);
 
     return FileResult_Success;
+}
+
+FileResult file_pal_create_dir_single_sync(String path) {
+    if (path.size >= PATH_MAX) {
+        return FileResult_PathTooLong;
+    }
+
+    Mem pathBuffer = mem_stack(PATH_MAX);
+    mem_cpy(pathBuffer, path);
+    *mem_at_u8(pathBuffer, path.size) = '\0';
+
+    const int perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    const int res = mkdir((const char*)pathBuffer.ptr, perms);
+
+    return res != 0 ? fileresult_from_errno() : FileResult_Success;
 }

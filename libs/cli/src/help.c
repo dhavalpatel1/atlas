@@ -117,7 +117,7 @@ static void cli_help_write_flags(DynString* dynstr, CliApp* app, const CliHelpFl
         const bool required = (opt->flags & CliOptionFlags_Required) == CliOptionFlags_Required;
 
         const String shortName = opt->dataFlag.character ? fmt_write_scratch("-{},", fmt_char(opt->dataFlag.character)) : string_empty;
-        
+
         const String longName = fmt_write_scratch("--{}", fmt_text(opt->dataFlag.name));
 
         const String line = fmt_write_scratch(" {<4}{<21}{<10}", fmt_text(shortName), fmt_text(longName), required ? fmt_text_lit("REQUIRED") : fmt_text_lit("OPTIONAL"));

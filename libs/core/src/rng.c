@@ -17,7 +17,7 @@ struct RngXorWow {
 
 static u64 rng_splitmix64(u64* state) {
     u64 result = *state += 0x9E3779B97f4A7C15;
-    
+
     result     = (result ^ (result >> 30)) * 0xBF58476D1CE4E5B9;
     result     = (result ^ (result >> 27)) * 0x94D049BB133111EB;
 
@@ -52,7 +52,7 @@ static u32 rng_xorwow_next(Rng* rng) {
     u32* counter = &rngXorWow->state[4];
     u32 t = rngXorWow->state[3];
     const u32 s = rngXorWow->state[0];
-    
+
     rngXorWow->state[3] = rngXorWow->state[2];
     rngXorWow->state[2] = rngXorWow->state[1];
     rngXorWow->state[1] = s;
@@ -60,7 +60,7 @@ static u32 rng_xorwow_next(Rng* rng) {
     t ^= t >> 2U;
     t ^= t << 1U;
     t ^= s ^ (s << 4U);
-    
+
     rngXorWow->state[0] = t;
 
     *counter += 362437U;
@@ -76,9 +76,14 @@ void rng_init_thread() {
     g_rng = (Rng*)&g_rng_xorwow;
 }
 
+u32 rng_sample_u32(Rng *rng) {
+    diag_assert_msg(rng, "rng_next: Rng is not initialized");
+
+    return rng->next(rng);
+}
+
 f32 rng_sample_f32(Rng* rng) {
     diag_assert_msg(rng, "rng next: Rng is not initialized");
-    
     static const f32 toFloat = 1.0f / ((f32)u32_max + 1.0f);
 
     return rng->next(rng) * toFloat;
@@ -86,7 +91,7 @@ f32 rng_sample_f32(Rng* rng) {
 
 RngGaussPairF32 rng_sample_gauss_f32(Rng* rng) {
     f32 a, b;
-    
+
     do {
         a = rng_sample_f32(rng);
         b = rng_sample_f32(rng);
@@ -94,7 +99,7 @@ RngGaussPairF32 rng_sample_gauss_f32(Rng* rng) {
 
     const f32 magnitude = math_sqrt_f32(-2.0f * math_log_f32(a));
     const f32 angle = math_pi_f32 * 2.0f * b;
-    
+
     return (RngGaussPairF32) {
         .a = magnitude * math_cos_f32(angle),
         .b = magnitude * math_sin_f32(angle)
@@ -103,9 +108,8 @@ RngGaussPairF32 rng_sample_gauss_f32(Rng* rng) {
 
 Rng* rng_create_xorwow(Allocator* alloc, u64 seed) {
     diag_assert_msg(seed, "rng_create_xorwow(): 0 seed is invalid");
-    
     struct RngXorWow* rng = alloc_alloc_t(alloc, struct RngXorWow);
-    
+
     rng->api = (Rng) {
         .next = rng_xorwow_next,
         .destroy = rng_xorwow_destroy

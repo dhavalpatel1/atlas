@@ -11,6 +11,8 @@ typedef struct sRng Rng;
 
 extern THREAD_LOCAL Rng* g_rng;
 
+u32 rng_sample_u32(Rng *rng);
+
 f32 rng_sample_f32(Rng* rng);
 
 typedef struct {

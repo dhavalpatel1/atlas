@@ -39,18 +39,18 @@ String path_pal_executable(Mem outputBuffer) {
 }
 
 String path_pal_tempdir(Mem outputBuffer) {
-    DynString tmpWritter = dynstring_create_over(mem_stack(PATH_MAX));
+    DynString tmpWriter = dynstring_create_over(mem_stack(PATH_MAX));
     String result;
 
-    if (env_var(string_lit("TMPDIR"), &tmpWritter)) {
-        result = path_canonize_to_output_buffer(outputBuffer, dynstring_view(&tmpWritter));
+    if (env_var(string_lit("TMPDIR"), &tmpWriter)) {
+        result = path_canonize_to_output_buffer(outputBuffer, dynstring_view(&tmpWriter));
         goto Ret;
     }
 
     result = path_canonize_to_output_buffer(outputBuffer, string_lit("/tmp"));
 
 Ret:
-    dynstring_destroy(&tmpWritter);
+    dynstring_destroy(&tmpWriter);
 
     return result;
 }

@@ -55,7 +55,7 @@ typedef struct {
 
 #define anvil_msg(_CONDITION_, _MSG_FORMAT_LIT_, ...)   \
     do {                                                \
-        if (UNLIKELY(!(_CONDITION_))) {                  \
+        if (UNLIKELY(!(_CONDITION_))) {                 \
             anvil_error(_MSG_FORMAT_LIT_, __VA_ARGS__); \
         }                                               \
     } while (false)
@@ -72,19 +72,41 @@ typedef struct {
 
 #define anvil_require(_CONDITION_) anvil_require_msg(_CONDITION_, #_CONDITION_)
 
-#define anvil_eq_int(_A_, _B_) anvil_msg(_A_ == _B_, "{} == {}", fmt_int(_A_), fmt_int(_B_))
+#define anvil_eq_u64(_A_, _B_)                                         \
+    do {                                                               \
+        const u64 _a_ = (_A_);                                         \
+        const u64 _b_ = (_B_);                                         \
+                                                                       \
+        anvil_msg(_a_ == _b_, "{} == {}", fmt_int(_a_), fmt_int(_b_)); \
+    } while (false)
 
-#define anvil_neq_int(_A_, _B_) anvil_msg(_A_ != _B_, "{} != {}", fmt_int(_A_), fmt_int(_B_))
+#define anvil_eq_i64(_A_, _B_)                                         \
+    do {                                                               \
+        const i64 _a_ = (_A_);                                         \
+        const i64 _b_ = (_B_);                                         \
+                                                                        \
+        anvil_msg(_a_ == _b_, "{} == {}", fmt_int(_a_), fmt_int(_b_)); \
+    } while (false)
 
-#define anvil_eq_float(_A_, _B_, _THRESHOLD_) \
-    anvil_msg(math_abs(_A_ - _B_) <= (_THRESHOLD_), "{} == {}", fmt_float(_A_), fmt_float(_B_))
+#define anvil_eq_f64(_A_, _B_, _THRESHOLD_)                                                        \
+    do {                                                                                             \
+        const f64 _a_ = (_A_);                                                                       \
+        const f64 _b_ = (_B_);                                                                       \
+                                                                                                     \
+        anvil_msg(math_abs(_a_ - _b_) <= (_THRESHOLD_), "{} == {}", fmt_float(_a_), fmt_float(_b_)); \
+    } while (false)
 
-#define anvil_eq_string(_A_, _B_)                                    \
-    anvil_msg(                                                       \
-        string_eq(_A_, _B_),                                         \
-        "'{}' == '{}'",                                              \
-        fmt_text(_A_, .flags = FormatTextFlags_EscapeNonPrintAscii), \
-        fmt_text(_B_, .flags = FormatTextFlags_EscapeNonPrintAscii))
+#define anvil_eq_string(_A_, _B_)                                         \
+    do {                                                                  \
+        const String _a_ = (_A_);                                         \
+        const String _b_ = (_B_);                                         \
+                                                                          \
+        anvil_msg(                                                        \
+            string_eq(_a_, _b_),                                          \
+            "'{}' == '{}'",                                               \
+            fmt_text(_a_, .flags = FormatTextFlags_EscapeNonPrintAscii),  \
+            fmt_text(_b_, .flags = FormatTextFlags_EscapeNonPrintAscii)); \
+    } while (false)
 
 bool anvil_visit_setup(AnvilSpecContext*);
 

@@ -129,7 +129,7 @@ spec(parse) {
 
             anvil(string_is_empty(rem));
             anvil_require(res.type == JsonResultType_Success);
-            anvil_eq_float(json_number(doc, res.val), data[i].expected, 1e-32);
+            anvil_eq_f64(json_number(doc, res.val), data[i].expected, 1e-32);
         }
     }
 
@@ -189,7 +189,7 @@ spec(parse) {
 
         anvil(string_is_empty(rem));
         anvil_require(res.type == JsonResultType_Success);
-        anvil_eq_int(json_type(doc, res.val), JsonType_Null);
+        anvil_eq_u64(json_type(doc, res.val), JsonType_Null);
     }
 
     it("can parse sequences of multiple values") {
@@ -206,11 +206,11 @@ spec(parse) {
 
         dynarray_destroy(&values);
 
-        anvil_eq_int(json_type(doc, *dynarray_at_t(&values, 0, JsonVal)), JsonType_Number);
-        anvil_eq_int(json_type(doc, *dynarray_at_t(&values, 1, JsonVal)), JsonType_Bool);
-        anvil_eq_int(json_type(doc, *dynarray_at_t(&values, 2, JsonVal)), JsonType_Null);
-        anvil_eq_int(json_type(doc, *dynarray_at_t(&values, 3, JsonVal)), JsonType_Array);
-        anvil_eq_int(json_type(doc, *dynarray_at_t(&values, 4, JsonVal)), JsonType_Object);
+        anvil_eq_u64(json_type(doc, *dynarray_at_t(&values, 0, JsonVal)), JsonType_Number);
+        anvil_eq_u64(json_type(doc, *dynarray_at_t(&values, 1, JsonVal)), JsonType_Bool);
+        anvil_eq_u64(json_type(doc, *dynarray_at_t(&values, 2, JsonVal)), JsonType_Null);
+        anvil_eq_u64(json_type(doc, *dynarray_at_t(&values, 3, JsonVal)), JsonType_Array);
+        anvil_eq_u64(json_type(doc, *dynarray_at_t(&values, 4, JsonVal)), JsonType_Object);
     }
 
     it("fails on invalid input") {

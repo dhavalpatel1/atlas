@@ -138,7 +138,7 @@ FileResult file_create(Allocator* alloc, String path, FileMode mode, FileAccessF
     if (access & FileAccess_Read) {
         desiredAccess |= GENERIC_READ;
     }
-    
+
     if (mode != FileMode_Append && access & FileAccess_Write) {
         desiredAccess |= GENERIC_WRITE;
     }
@@ -291,6 +291,24 @@ FileResult file_delete_sync(String path) {
     return success ? FileResult_Success : fileresult_from_lasterror();
 }
 
+FileResult file_delete_dir_sync(String path) {
+    const usize pathBufferSize = winutils_to_widestr_size(path);
+    if (sentinel_check(pathBufferSize)) {
+        return FileResult_PathInvalid;
+    }
+
+    if (pathBufferSize > path_pal_max_size) {
+        return FileResult_PathTooLong;
+    }
+
+    Mem pathBufferMem = mem_stack(pathBufferSize);
+    winutils_to_widestr_size(pathBufferMem, path);
+
+    const BOOL success = RemoveDirectory(pathBufferMem.ptr);
+
+    return success ? FileResult_Success : fileresult_from_lasterror();
+}
+
 FileResult file_map(File* file, String* output) {
     diag_assert_msg(!file->mapping, "File is already mapped");
 
@@ -329,4 +347,22 @@ FileResult file_map(File* file, String* output) {
     *output = mem_create(addr, (usize)size.QuadPart);
 
     return FileResult_Success;
+}
+
+FileResult file_pal_create_dir_single_sync(String path) {
+    const usize pathBufferSize = winutils_to_widestr_size(path);
+    if (sentinel_check(pathBufferSize)) {
+        return FileResult_PathInvalid;
+    }
+
+    if (pathBufferSize > path_pal_max_size) {
+        return FileResult_PathTooLong;
+    }
+
+    Mem pathBufferMem = mem_stack(pathBufferSize);
+    winutils_to_widestr(pathBufferMem, path);
+
+    const BOOL success = CreateDirectory((const wchar_t*)pathBufferMem.ptr, null);
+
+    return success ? FileResult_Success : fileresult_from_lasterror();
 }

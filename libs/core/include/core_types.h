@@ -20,7 +20,10 @@ typedef uintptr_t uptr;
 typedef float f32;
 typedef double f64;
 
+#if !defined(ATLAS_GCC)
 typedef u8 bool;
+#endif
+
 #define true 1
 #define false 0
 

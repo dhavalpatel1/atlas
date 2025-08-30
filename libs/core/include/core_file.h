@@ -76,4 +76,8 @@ FileInfo file_stat_sync(File* file);
 
 FileResult file_delete_sync(String path);
 
+FileResult file_delete_dir_sync(String path);
+
 FileResult file_map(File* file, String* output);
+
+FileResult file_create_dir_sync(String path);

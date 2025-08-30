@@ -69,7 +69,7 @@ static FormatReplOpt format_replacement_parse_opt(String str) {
     str = format_read_whitespace(str, null);
 
     diag_assert_msg(!str.size, "Unsupported format option: '{}'", fmt_text(str, .flags = FormatTextFlags_EscapeNonPrintAscii));
-    
+
     return result;
 }
 
@@ -98,7 +98,7 @@ void format_write_formatted(DynString *dynstr, String format, const FormatArg* a
         FormatRepl repl;
         if (!format_replacement_find(format, &repl)) {
             dynstring_append(dynstr, format);
-            
+
             break;
         }
 
@@ -126,7 +126,7 @@ void format_write_formatted(DynString *dynstr, String format, const FormatArg* a
                 case FormatReplOptKind_PadCenter: {
                     const usize padding = math_max(0, repl.opt.value - (i32)(argEnd - argStart));
                     dynstring_insert_chars(dynstr, ' ', argStart, padding / 2);
-                    dynstring_append_chars(dynstr, ' ', padding / 2 + padding % 2); 
+                    dynstring_append_chars(dynstr, ' ', padding / 2 + padding % 2);
                 } break;
             }
 
@@ -400,7 +400,7 @@ void format_write_time_duration_pretty(DynString *dynstr, TimeDuration val) {
 
     const TimeDuration absVal = math_abs(val);
     usize i = 0;
-    for (; (i + 1) != array_elems(units) && absVal >= units[i + 1].val; ++i) 
+    for (; (i + 1) != array_elems(units) && absVal >= units[i + 1].val; ++i)
         ;
 
     format_write_float(dynstr, (f64)val / (f64)units[i].val, .maxDecDigits = 1);
@@ -484,7 +484,7 @@ void format_write_text_wrapped(DynString* dynstr, String val, usize maxWidth, St
         while (!string_is_empty(val)) {
             switch (*string_begin(val)) {
                 case '\r': {
-                    
+
                 } break;
 
                 case '\n': {
@@ -587,7 +587,7 @@ static String format_read_sign(String input, i8* output) {
             } break;
         }
     }
-    
+
     if (LIKELY(output)) {
         *output = sign;
     }
@@ -640,7 +640,7 @@ String format_read_f64(String input, f64* output) {
         if (ch == '.' && !passedDecPoint) {
             passedDecPoint = true;
             input = string_consume(input, 1);
-            
+
             continue;
         }
 

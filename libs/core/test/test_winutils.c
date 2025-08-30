@@ -13,18 +13,18 @@ spec(winutils) {
             "⎳aⁱ-bⁱ⎟⎥⎪▁▂▃▄▅▆▇█∀∂∈ℝ∧∪≡∞");
 
         const usize wideCharsSize = winutils_to_widestr_size(testStr);
-        anvil_eq_int(wideCharsSize, 368 + sizeof(wchar_t));
+        anvil_eq_u64(wideCharsSize, 368 + sizeof(wchar_t));
 
         Mem         wideChars     = mem_stack(wideCharsSize);
         const usize wideCharCount = winutils_to_widestr(wideChars, testStr);
 
         anvil(*(mem_end(wideChars) - 1) == '\0');
-        anvil_eq_int(winutils_from_widestr_size(wideChars.ptr, wideCharCount), testStr.size);
+        anvil_eq_u64(winutils_from_widestr_size(wideChars.ptr, wideCharCount), testStr.size);
 
         Mem         utf8     = mem_stack(winutils_from_widestr_size(wideChars.ptr, wideCharCount));
         const usize utf8Size = winutils_from_widestr(utf8, wideChars.ptr, wideCharCount);
 
-        anvil_eq_int(utf8Size, testStr.size);
+        anvil_eq_u64(utf8Size, testStr.size);
         anvil(mem_eq(utf8, testStr));
     }
     #endif

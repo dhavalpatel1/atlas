@@ -14,21 +14,21 @@ spec(app) {
 
         const CliId b = cli_register_flag(app, 'b', string_lit("opt-b"), CliOptionFlags_None);
 
-        anvil_neq_int(a, b);
+        anvil(a != b);
     }
 
     it("assigns unique ids to args") {
         const CliId a = cli_register_arg(app, string_lit("arg-a"), CliOptionFlags_None);
         const CliId b = cli_register_arg(app, string_lit("arg-b"), CliOptionFlags_None);
 
-        anvil_neq_int(a, b);
+        anvil(a != b);
     }
 
     it("assigns unique ids to flags and args") {
         const CliId a = cli_register_flag(app, 'a', string_lit("opt-a"), CliOptionFlags_None);
         const CliId b = cli_register_arg(app, string_lit("arg"), CliOptionFlags_None);
 
-        anvil_neq_int(a, b);
+        anvil(a != b);
     }
 
     it("supports registering descriptions for options") {

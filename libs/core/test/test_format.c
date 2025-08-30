@@ -285,7 +285,7 @@ spec(format) {
             {42 * usize_kibibyte, string_lit("42KiB")},
             {42 * usize_mebibyte, string_lit("42MiB")},
             {3 * usize_gibibyte, string_lit("3GiB")},
-            #if uptr_max == u64_max 
+            #if uptr_max == u64_max
             {42 * usize_gibibyte, string_lit("42GiB")},
             {42 * usize_tebibyte, string_lit("42TiB")},
             {42 * usize_pebibyte, string_lit("42PiB")},
@@ -448,7 +448,7 @@ spec(format) {
         for (usize i = 0; i != array_elems(data); ++i) {
             u64          out;
             const String rem = format_read_u64(data[i].val, &out, data[i].base);
-            anvil_eq_int(out, data[i].expected);
+            anvil_eq_u64(out, data[i].expected);
             anvil_eq_string(rem, data[i].expectedRemaining);
         }
     }
@@ -473,7 +473,7 @@ spec(format) {
         for (usize i = 0; i != array_elems(data); ++i) {
             i64          out;
             const String rem = format_read_i64(data[i].val, &out, data[i].base);
-            anvil_eq_int(out, data[i].expected);
+            anvil_eq_u64(out, data[i].expected);
             anvil_eq_string(rem, data[i].expectedRemaining);
         }
     }
@@ -524,7 +524,7 @@ spec(format) {
         for (usize i = 0; i != array_elems(data); ++i) {
             f64          out;
             const String rem = format_read_f64(data[i].val, &out);
-            anvil_eq_float(out, data[i].expected, 1e-32);
+            anvil_eq_f64(out, data[i].expected, 1e-32);
             anvil_eq_string(rem, data[i].expectedRemaining);
         }
     }

@@ -101,7 +101,7 @@ struct sFormatArg {
         .type = FormatArgType_f64,                      \
         .value_f64 = (_VAL_),                           \
         .settings = &format_opts_float(__VA_ARGS__)     \
-    })                                                  
+    })
 
 #define fmt_bool(_VAL_)             \
     ((FormatArg) {                  \

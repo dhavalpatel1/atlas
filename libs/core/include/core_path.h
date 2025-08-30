@@ -1,6 +1,13 @@
 #pragma once
 
 #include "core_dynstring.h"
+#include "core_macro.h"
+
+typedef struct sRng Rng;
+
+#define path_build(_DYNSTRING_, ...) path_build_raw((_DYNSTRING_), (const String[]){ VA_ARGS_SKIP_FIRST(0, ##__VA_ARGS__, string_empty) })
+
+#define path_build_scratch(...) path_build_scratch_raw((const String[]){ VA_ARGS_SKIP_FIRST(0, ##__VA_ARGS__, string_empty) })
 
 extern String g_path_workingdir;
 
@@ -23,3 +30,11 @@ String path_parent(String path);
 bool path_canonize(DynString* result, String path);
 
 void path_append(DynString* basePath, String path);
+
+void path_build_raw(DynString* str, const String* segments);
+
+String path_build_scratch_raw(const String* segments);
+
+void path_random_name(DynString*, Rng*, String prefix);
+
+String path_random_name_scratch(Rng*, String prefix);

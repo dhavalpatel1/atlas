@@ -19,7 +19,7 @@ spec(shuffle) {
         i32 expectedInts[] = {0, 2, 9, 7, 1, 8, 5, 4, 3, 6};
 
         for (i32 i = 0; i != array_elems(ints); ++i) {
-            anvil_eq_int(ints[i], expectedInts[i]);
+            anvil_eq_u64(ints[i], expectedInts[i]);
         }
 
         rng_destroy(rng);

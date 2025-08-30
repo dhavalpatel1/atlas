@@ -7,38 +7,38 @@ spec(time) {
     it("can compute the day-of-the-week from a real-time") {
         const TimeReal e = time_real_epoch;
 
-        anvil_eq_int(time_real_to_weekday(e), TimeWeekDay_Thursday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_day)), TimeWeekDay_Friday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(2))), TimeWeekDay_Saturday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(3))), TimeWeekDay_Sunday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(4))), TimeWeekDay_Monday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(5))), TimeWeekDay_Tuesday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(6))), TimeWeekDay_Wednesday);
-        anvil_eq_int(time_real_to_weekday(time_real_offset(e, time_days(7))), TimeWeekDay_Thursday);
+        anvil_eq_u64(time_real_to_weekday(e), TimeWeekDay_Thursday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_day)), TimeWeekDay_Friday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(2))), TimeWeekDay_Saturday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(3))), TimeWeekDay_Sunday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(4))), TimeWeekDay_Monday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(5))), TimeWeekDay_Tuesday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(6))), TimeWeekDay_Wednesday);
+        anvil_eq_u64(time_real_to_weekday(time_real_offset(e, time_days(7))), TimeWeekDay_Thursday);
     }
 
     it("can compute the date from a real-time") {
         const TimeDate epochDate = time_real_to_date(time_real_epoch);
-        anvil_eq_int(epochDate.year, 1970);
-        anvil_eq_int(epochDate.month, TimeMonth_January);
-        anvil_eq_int(epochDate.day, 1);
+        anvil_eq_u64(epochDate.year, 1970);
+        anvil_eq_u64(epochDate.month, TimeMonth_January);
+        anvil_eq_u64(epochDate.day, 1);
 
         const TimeDate testDate1 =
             time_real_to_date(time_real_offset(time_real_epoch, time_days(42424)));
-        anvil_eq_int(testDate1.year, 2086);
-        anvil_eq_int(testDate1.month, TimeMonth_February);
-        anvil_eq_int(testDate1.day, 25);
+        anvil_eq_u64(testDate1.year, 2086);
+        anvil_eq_u64(testDate1.month, TimeMonth_February);
+        anvil_eq_u64(testDate1.day, 25);
 
         const TimeDate testDate2 =
             time_real_to_date(time_real_offset(time_real_epoch, -time_days(42424)));
-        anvil_eq_int(testDate2.year, 1853);
-        anvil_eq_int(testDate2.month, TimeMonth_November);
-        anvil_eq_int(testDate2.day, 6);
+        anvil_eq_u64(testDate2.year, 1853);
+        anvil_eq_u64(testDate2.month, TimeMonth_November);
+        anvil_eq_u64(testDate2.day, 6);
 
         const TimeDate testDate3 = time_real_to_date(time_real_offset(time_real_epoch, time_days(13)));
-        anvil_eq_int(testDate3.year, 1970);
-        anvil_eq_int(testDate3.month, TimeMonth_January);
-        anvil_eq_int(testDate3.day, 14);
+        anvil_eq_u64(testDate3.year, 1970);
+        anvil_eq_u64(testDate3.month, TimeMonth_January);
+        anvil_eq_u64(testDate3.day, 14);
     }
 
     it("can compute the real-time for a date") {
@@ -46,14 +46,14 @@ spec(time) {
             time_date_to_real((TimeDate){.year = 2021, .month = TimeMonth_June, .day = 1});
         const TimeReal fourthTwoDaysFromDateTime = time_real_offset(dateTime, time_days(42));
 
-        anvil_eq_int(
+        anvil_eq_u64(
             fourthTwoDaysFromDateTime,
             time_date_to_real((TimeDate){.year = 2021, .month = TimeMonth_July, .day = 13}));
     }
 
     it("can retrieve the current real-time from the real-clock") {
         const TimeDate today = time_real_to_date(time_real_clock());
-        
+
         anvil(today.year >= 2021 && today.year < 2200);
     }
 
@@ -62,7 +62,7 @@ spec(time) {
         const TimeDate     b       = (TimeDate){.year = 1992, .month = TimeMonth_June, .day = 9};
         const TimeDuration dur     = time_real_duration(time_date_to_real(a), time_date_to_real(b));
         const i32          durDays = dur / time_day;
-        anvil_eq_int(durDays, 106708);
+        anvil_eq_u64(durDays, 106708);
     }
 
     it("can compute the time-duration for dates below year 0") {
@@ -70,6 +70,6 @@ spec(time) {
         const TimeDate     b       = (TimeDate){.year = -42, .month = TimeMonth_April, .day = 13};
         const TimeDuration dur     = time_real_duration(time_date_to_real(a), time_date_to_real(b));
         const i32          durDays = dur / time_day;
-        anvil_eq_int(durDays, 15283);
+        anvil_eq_u64(durDays, 15283);
     }
 }

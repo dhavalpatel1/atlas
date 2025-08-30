@@ -18,3 +18,5 @@ struct sFile {
 };
 
 void file_pal_init();
+
+FileResult file_pal_create_dir_single_sync(String path);
