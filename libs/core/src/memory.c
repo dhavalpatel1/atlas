@@ -53,7 +53,9 @@ FORCE_INLINE i8 mem_cmp(const Mem a, const Mem b) {
     diag_assert(mem_valid(a));
     diag_assert(mem_valid(b));
 
-    return math_sign(memcmp(a.ptr, b.ptr, math_min(a.size, b.size)));
+    const int cmp = memcmp(a.ptr, b.ptr, math_min(a.size, b.size));
+
+    return math_sign(cmp);
 }
 
 FORCE_INLINE bool mem_eq(Mem a, Mem b) {

@@ -27,7 +27,9 @@ void string_free(Allocator* alloc, String str) {
 }
 
 i8 string_cmp(String a, String b) {
-    return math_sign(strncmp((const char*)a.ptr, (const char*)b.ptr, math_min(a.size, b.size)));
+    const int cmp = strncmp((const char*)a.ptr, (const char*)b.ptr, math_min(a.size, b.size));
+
+    return math_sign(cmp);
 }
 
 bool string_eq(String a, String b) {
@@ -51,9 +53,9 @@ String string_consume(String str, usize amount) {
 }
 
 usize string_find_first(String str, String subStr) {
-    
+
     for (u8* itr = mem_begin(str); itr <= string_end(str) - subStr.size; ++itr) {
-        
+
         if (mem_eq(mem_create(itr, subStr.size), subStr)) {
             return itr - string_begin(str);
         }
@@ -73,9 +75,9 @@ usize string_find_first_any(String str, String chars) {
 }
 
 usize string_find_last(String str, String subStr) {
-    
+
     for (u8* itr = mem_end(str) - subStr.size + 1; itr-- > string_begin(str);) {
-        
+
         if (mem_eq(mem_create(itr, subStr.size), subStr)) {
             return itr - string_begin(str);
         }
@@ -85,9 +87,9 @@ usize string_find_last(String str, String subStr) {
 }
 
 usize string_find_last_any(String str, String chars) {
-    
+
     for (u8* itr = mem_end(str); itr-- != mem_begin(str);) {
-        
+
         if (mem_contains(chars, *itr)) {
             return itr - string_begin(str);
         }

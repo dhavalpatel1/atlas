@@ -302,7 +302,7 @@ FileResult file_delete_dir_sync(String path) {
     }
 
     Mem pathBufferMem = mem_stack(pathBufferSize);
-    winutils_to_widestr_size(pathBufferMem, path);
+    winutils_to_widestr(pathBufferMem, path);
 
     const BOOL success = RemoveDirectory(pathBufferMem.ptr);
 

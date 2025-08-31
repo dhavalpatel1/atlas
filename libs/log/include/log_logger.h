@@ -39,8 +39,9 @@ typedef struct sLogSink LogSink;
 
 #define log(_LOGGER_, _LVL_, _TXT_LIT_, ...)                                                                    \
     do {                                                                                                        \
-        if (_LOGGER_) {                                                                                         \
-            log_append((_LOGGER_), (_LVL_), source_location(), string_lit(_TXT_LIT_), log_params(__VA_ARGS__)); \
+        Logger* _logger_ = (_LOGGER_);                                                                          \
+        if (_logger_) {                                                                                         \
+            log_append((_logger_), (_LVL_), source_location(), string_lit(_TXT_LIT_), log_params(__VA_ARGS__)); \
         }                                                                                                       \
     } while (false)
 
