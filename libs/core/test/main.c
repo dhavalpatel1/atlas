@@ -1,11 +1,17 @@
+#include "core_alloc.h"
 #include "core_file.h"
 #include "core_init.h"
 
 #include "cli.h"
 
+#include "log.h"
+
 #include "jobs_init.h"
 
 #include "anvil_runner.h"
+#include "log_init.h"
+#include "log_logger.h"
+#include "log_sink_json.h"
 
 static int run_tests(const bool outputPassingTests) {
     AnvilDef* anvil = anvil_create(g_alloc_heap);
@@ -47,6 +53,7 @@ static int run_tests(const bool outputPassingTests) {
 int main(const int argc, const char** argv) {
     core_init();
     jobs_init();
+    log_init();
 
     int exitCode = 0;
 
@@ -72,6 +79,8 @@ int main(const int argc, const char** argv) {
         goto exit;
     }
 
+    log_add_sink(g_logger, log_sink_json_default(g_alloc_heap, LogMask_All));
+
     const bool outputPassingTests = cli_parse_provided(invoc, outputPassingTestsFlags);
     exitCode = run_tests(outputPassingTests);
 
@@ -79,6 +88,7 @@ exit:
     cli_parse_destroy(invoc);
     cli_app_destroy(app);
 
+    log_teardown();
     jobs_teardown();
     core_teardown();
 

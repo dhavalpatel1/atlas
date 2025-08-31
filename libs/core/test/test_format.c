@@ -1,9 +1,11 @@
 #include "core_array.h"
 #include "core_bits.h"
+#include "core_file.h"
 #include "core_float.h"
 #include "core_format.h"
 
 #include "anvil_spec.h"
+#include "core_time.h"
 
 spec(format) {
     it("can write FormatArg's") {
@@ -274,6 +276,13 @@ spec(format) {
             anvil_eq_string(dynstring_view(&string), data[i].expected);
         }
         dynstring_destroy(&string);
+    }
+
+    it("can write time in iso8601 format without seperators") {
+        const TimeReal time = time_real_offset(time_real_epoch, time_days(40) + time_hours(13) + time_milliseconds(42));
+        const String str = format_write_arg_scratch(&fmt_time(time, .flags = FormatTimeFlags_None));
+
+        anvil_eq_string(str, string_lit("19700210T130000042Z"));
     }
 
     it("can write byte-sizes in pretty format") {

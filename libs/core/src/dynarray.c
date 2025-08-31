@@ -19,7 +19,7 @@ DynArray dynarray_create(Allocator *allocator, const u16 stride, const u16 align
     if (capacity) {
         const usize capacityBytes = bits_nextpow2_64(capacity * stride);
         array.data = alloc_alloc(allocator, capacityBytes, align);
-
+        
         diag_assert_msg(mem_valid(array.data), "Allocation failed");
     }
 

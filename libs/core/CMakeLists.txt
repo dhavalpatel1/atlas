@@ -79,8 +79,9 @@ add_executable(atlas_core_test
     test/test_winutils.c
 )
 
+target_link_libraries(atlas_core_test PRIVATE atlas_anvil)
 target_link_libraries(atlas_core_test PRIVATE atlas_cli)
 target_link_libraries(atlas_core_test PRIVATE atlas_core)
-target_link_libraries(atlas_core_test PRIVATE atlas_anvil)
+target_link_libraries(atlas_core_test PRIVATE atlas_log)
 
 configure_test(atlas_core_test core)

@@ -6,8 +6,11 @@
 #include "jobs_graph.h"
 #include "jobs_scheduler.h"
 
+#include "log_logger.h"
+
 #include "anvil_runner.h"
 
+#include "output_log.h"
 #include "output_pretty.h"
 #include "spec_internal.h"
 
@@ -45,7 +48,8 @@ AnvilResultType anvil_run(AnvilDef* check, const AnvilRunFlags flags) {
     const TimeSteady startTime = time_steady_clock();
 
     AnvilOutput* outputs[] = {
-        anvil_output_pretty_create(g_alloc_heap, g_file_stdout, flags)
+        anvil_output_pretty_create(g_alloc_heap, g_file_stdout, flags),
+        anvil_output_log_create(g_alloc_heap, g_logger)
     };
 
     AnvilRunContext ctx = {

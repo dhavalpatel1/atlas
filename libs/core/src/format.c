@@ -226,6 +226,18 @@ void format_write_arg(DynString *dynstr, const FormatArg *arg) {
     }
 }
 
+String format_write_arg_scratch(const FormatArg* arg) {
+    Mem scratchMem = alloc_alloc(g_alloc_scratch, usize_kibibyte, 1);
+    DynString str = dynstring_create_over(scratchMem);
+
+    format_write_arg(&str, arg);
+
+    String res = dynstring_view(&str);
+    dynstring_destroy(&str);
+
+    return res;
+}
+
 void format_write_u64(DynString *dynstr, u64 val, const FormatOptsInt *opts) {
     diag_assert(opts->base > 1 && opts->base <= 16);
 
@@ -416,24 +428,43 @@ void format_write_time_iso8601(DynString *dynstr, TimeReal val, const FormatOpts
 
     if (opts->terms & FormatTimeTerms_Date) {
         format_write_int(dynstr, date.year, .minDigits = 4);
-        dynstring_append_char(dynstr, '-');
+        if (opts->flags & FormatTimeFlags_HumanReadable) {
+            dynstring_append_char(dynstr, '-');
+        }
+
         format_write_int(dynstr, date.month, .minDigits = 2);
-        dynstring_append_char(dynstr, '-');
+
+        if (opts->flags & FormatTimeFlags_HumanReadable) {
+            dynstring_append_char(dynstr, '-');
+        }
+
         format_write_int(dynstr, date.day, .minDigits = 2);
     }
 
     if (opts->terms & FormatTimeTerms_Time) {
         dynstring_append_char(dynstr, 'T');
         format_write_int(dynstr, hours, .minDigits = 2);
-        dynstring_append_char(dynstr, ':');
+
+        if (opts->flags & FormatTimeFlags_HumanReadable) {
+            dynstring_append_char(dynstr, ':');
+        }
+
         format_write_int(dynstr, minutes, .minDigits = 2);
-        dynstring_append_char(dynstr, ':');
+
+        if (opts->flags & FormatTimeFlags_HumanReadable) {
+            dynstring_append_char(dynstr, ':');
+        }
+
         format_write_int(dynstr, seconds, .minDigits = 2);
     }
 
     if (opts->terms & FormatTimeTerms_Milliseconds) {
         const u16 milliseconds = (localTime / (time_millisecond / time_microsecond)) % 1000;
-        dynstring_append_char(dynstr, '.');
+
+        if (opts->flags & FormatTimeFlags_HumanReadable) {
+            dynstring_append_char(dynstr, '.');
+        }
+
         format_write_int(dynstr, milliseconds, .minDigits = 3);
     }
 
@@ -446,7 +477,11 @@ void format_write_time_iso8601(DynString *dynstr, TimeReal val, const FormatOpts
             }
 
             format_write_int(dynstr, opts->timezone / 60, .minDigits = 2);
-            dynstring_append_char(dynstr, ':');
+
+            if (opts->flags & FormatTimeFlags_HumanReadable) {
+                dynstring_append_char(dynstr, ':');
+            }
+
             format_write_int(dynstr, opts->timezone % 60, .minDigits = 2);
         }
     }

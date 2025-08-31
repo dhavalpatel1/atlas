@@ -35,6 +35,10 @@ void path_build_raw(DynString* str, const String* segments);
 
 String path_build_scratch_raw(const String* segments);
 
-void path_random_name(DynString*, Rng*, String prefix);
+void path_name_random(DynString*, Rng*, String prefix);
 
-String path_random_name_scratch(Rng*, String prefix);
+String path_name_random_scratch(Rng*, String prefix);
+
+void path_name_timestamp(DynString*, String prefix);
+
+String path_name_timestamp_scratch(String prefix);

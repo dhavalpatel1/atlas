@@ -99,7 +99,7 @@ static void cli_help_write_args(DynString* dynstr, CliApp* app, const CliHelpFla
 
         dynstring_append(dynstr, line);
 
-        const String linePrefix = fmt_write_scratch("{}", fmt_padding((u16)line.size));
+        const String linePrefix = format_write_arg_scratch(&fmt_padding((u16)line.size));
         format_write_text_wrapped(dynstr, opt->desc, cli_help_max_width - linePrefix.size, linePrefix);
 
         fmt_write(dynstr, "\n");
@@ -124,7 +124,7 @@ static void cli_help_write_flags(DynString* dynstr, CliApp* app, const CliHelpFl
 
         dynstring_append(dynstr, line);
 
-        const String linePrefix = fmt_write_scratch("{}", fmt_padding((u16)line.size));
+        const String linePrefix = format_write_arg_scratch(&fmt_padding((u16)line.size));
         format_write_text_wrapped(dynstr, opt->desc, cli_help_max_width - line.size, linePrefix);
 
         fmt_write(dynstr, "\n");

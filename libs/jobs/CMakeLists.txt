@@ -24,5 +24,6 @@ add_executable(atlas_jobs_test
 target_link_libraries(atlas_jobs_test PRIVATE atlas_anvil)
 target_link_libraries(atlas_jobs_test PRIVATE atlas_cli)
 target_link_libraries(atlas_jobs_test PRIVATE atlas_jobs)
+target_link_libraries(atlas_jobs_test PRIVATE atlas_log)
 
 configure_test(atlas_jobs_test jobs)

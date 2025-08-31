@@ -24,5 +24,6 @@ add_executable(atlas_cli_test
 
 target_link_libraries(atlas_cli_test PRIVATE atlas_cli)
 target_link_libraries(atlas_cli_test PRIVATE atlas_anvil)
+target_link_libraries(atlas_cli_test PRIVATE atlas_log)
 
 configure_test(atlas_cli_test cli)

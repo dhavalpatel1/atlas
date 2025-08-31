@@ -204,9 +204,15 @@ typedef enum {
     FormatTimeTerms_All          = ~FormatTimeTerms_None
 } FormatTimeTerms;
 
+typedef enum {
+    FormatTimeFlags_None = 0,
+    FormatTimeFlags_HumanReadable = 1 << 0,
+} FormatTimeFlags;
+
 typedef struct {
     TimeZone timezone;
     FormatTimeTerms terms;
+    FormatTimeFlags flags;
 } FormatOptsTime;
 
 typedef enum {
@@ -242,11 +248,12 @@ typedef struct {
         __VA_ARGS__              \
     })
 
-#define format_opts_time(...)         \
-    ((FormatOptsTime) {               \
-        .timezone = time_zone_utc,    \
-        .terms = FormatTimeTerms_All, \
-        __VA_ARGS__                   \
+#define format_opts_time(...)                   \
+    ((FormatOptsTime) {                         \
+        .timezone = time_zone_utc,              \
+        .terms = FormatTimeTerms_All,           \
+        .flags = FormatTimeFlags_HumanReadable, \
+        __VA_ARGS__                             \
     })
 
 #define format_opts_text(...)          \
@@ -267,6 +274,8 @@ typedef struct {
         format_write_f64(_DYNSTRING_, _VAL_, &format_opts_float(__VA_ARGS__)) \
 
 void format_write_arg(DynString* dynstr, const FormatArg* arg);
+
+String format_write_arg_scratch(const FormatArg*);
 
 void format_write_formatted(DynString* dynstr, String format, const FormatArg* args);
 
