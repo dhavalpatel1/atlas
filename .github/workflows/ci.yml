@@ -30,21 +30,21 @@ jobs:
                       }
                     - {
                           name: windows-msvc,
-                          image: windows-2019,
+                          image: windows-2022,
                           os: windows,
                           toolchain: msvc,
                           cc: cl,
                       }
                     - {
                           name: windows-clang,
-                          image: windows-2019,
+                          image: windows-2022,
                           os: windows,
                           toolchain: msvc,
                           cc: clang,
                       }
                     - {
                           name: windows-mingw,
-                          image: windows-2019,
+                          image: windows-2022,
                           os: windows,
                           toolchain: mingw,
                           cc: gcc,
