@@ -72,16 +72,17 @@ typedef struct {
 
 #define anvil_require(_CONDITION_) anvil_require_msg(_CONDITION_, #_CONDITION_)
 
-#define anvil_eq_int(_A_, _B_)                                            \
-    _Generic((_A_),                                                       \
-        u8:  anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        u16: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        u32: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        u64: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        i8:  anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        i16: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        i32: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
-        i64: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location())  \
+#define anvil_eq_int(_A_, _B_)                                                         \
+    _Generic((_A_),                                                                    \
+        u8:  anvil_eq_u64_raw(_testCtx, (u64)(_A_), (u64)(_B_), source_location()),    \
+        u16: anvil_eq_u64_raw(_testCtx, (u64)(_A_), (u64)(_B_), source_location()),    \
+        u32: anvil_eq_u64_raw(_testCtx, (u64)(_A_), (u64)(_B_), source_location()),    \
+        u64: anvil_eq_u64_raw(_testCtx, (u64)(_A_), (u64)(_B_), source_location()),    \
+        i8:  anvil_eq_i64_raw(_testCtx, (i64)(_A_), (i64)(_B_), source_location()),    \
+        i16: anvil_eq_i64_raw(_testCtx, (i64)(_A_), (i64)(_B_), source_location()),    \
+        i32: anvil_eq_i64_raw(_testCtx, (i64)(_A_), (i64)(_B_), source_location()),    \
+        i64: anvil_eq_i64_raw(_testCtx, (i64)(_A_), (i64)(_B_), source_location()),    \
+        default: anvil_eq_i64_raw(_testCtx, (i64)(_A_), (i64)(_B_), source_location()) \
     )
 
 #define anvil_eq_float(_A_, _B_, _THRESHOLD_) anvil_eq_f64_raw(_testCtx, (_A_), (_B_), (_THRESHOLD_), source_location())

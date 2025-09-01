@@ -129,7 +129,7 @@ spec(file) {
     }
 
     it("can create a new file by opening a file-handle with 'Create' mode") {
-        String path = path_build_scratch(g_path_tempdir, path_name_random_scratch(g_rng, string_lit("atlas")));
+        String path = path_build_scratch(g_path_tempdir, path_name_random_scratch(g_rng, string_lit("atlas"), string_empty));
 
         File* file;
         anvil_eq_int(file_create(g_alloc_heap, path, FileMode_Create, FileAccess_Write, &file), FileResult_Success);
@@ -145,7 +145,7 @@ spec(file) {
     }
 
     it("can create a new directory") {
-        String path = path_build_scratch(g_path_tempdir, path_name_random_scratch(g_rng, string_lit("atlas")));
+        String path = path_build_scratch(g_path_tempdir, path_name_random_scratch(g_rng, string_lit("atlas"), string_empty));
 
         anvil_eq_int(file_create_dir_sync(path), FileResult_Success);
 

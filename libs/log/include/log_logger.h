@@ -35,7 +35,7 @@ typedef struct sLogSink LogSink;
 
 #define log_param(_NAME_LIT_, _ARG_) ((LogParam){ .name = string_lit(_NAME_LIT_), .arg = (_ARG_) })
 
-#define log_params(...) (const LogParam[]) { VA_ARGS_SKIP_FIRST(0, ##__VA_ARGS__, (LogParam){0}) }
+#define log_params(...) (const LogParam[]) { VA_ARGS_SKIP_FIRST(0, ##__VA_ARGS__, (LogParam){ .name = {0}, .arg = {0} }) }
 
 #define log(_LOGGER_, _LVL_, _TXT_LIT_, ...)                                                                    \
     do {                                                                                                        \

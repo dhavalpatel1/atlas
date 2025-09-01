@@ -127,16 +127,19 @@ spec(path) {
         Allocator* alloc = alloc_bump_create_stack(256);
         Rng* rng = rng_create_xorwow(alloc, seed);
 
-        anvil_eq_string(path_name_random_scratch(rng, string_empty), string_lit("nkOZrR4b15bJ"));
-        anvil_eq_string(path_name_random_scratch(rng, string_lit("hello")), string_lit("hello_ecfcmkK1mPyR"));
+        anvil_eq_string(path_name_random_scratch(rng, string_empty, string_empty), string_lit("nkOZrR4b15bJ"));
+        anvil_eq_string(path_name_random_scratch(rng, string_lit("hello"), string_empty), string_lit("hello_ecfcmkK1mPyR"));
     }
 
     it("can generate a tiemstampped file-name") {
-        const String nameWithoutPrefix = path_name_timestamp_scratch(string_empty);
+        const String nameWithoutPrefix = path_name_timestamp_scratch(string_empty, string_empty);
         anvil_eq_int(nameWithoutPrefix.size, 15);
 
-        const String nameWithPrefix = path_name_timestamp_scratch(string_lit("hello"));
+        const String nameWithPrefix = path_name_timestamp_scratch(string_lit("hello"), string_empty);
         anvil_eq_int(nameWithPrefix.size, 21);
+
+        const String nameWithPrefixAndExt = path_name_timestamp_scratch(string_lit("hello"), string_lit("tmp"));
+        anvil_eq_int(nameWithPrefixAndExt.size, 25);
     }
 
     it("can retrieve the executable path") {
