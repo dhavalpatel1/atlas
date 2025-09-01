@@ -1,4 +1,4 @@
-name: Test Suite
+name: Test
 
 on:
     push:
@@ -7,7 +7,6 @@ on:
         branches: [main, develop]
     workflow_dispatch:
 
-# Cancel previous runs on new pushes to the same PR/branch
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
@@ -15,202 +14,85 @@ concurrency:
 jobs:
     test:
         name: ${{ matrix.config.name }}
-        runs-on: ${{ matrix.config.image }}
-        timeout-minutes: 30
+        runs-on: ${{ matrix.config.runner }}
+        timeout-minutes: 20
 
         strategy:
             fail-fast: false
             matrix:
                 config:
-                    - {
-                          name: "Ubuntu GCC",
-                          image: ubuntu-22.04,
-                          os: linux,
-                          toolchain: unix,
-                          cc: gcc-12,
-                          cxx: g++-12,
-                          packages: "gcc-12 g++-12",
-                      }
-                    - {
-                          name: "Ubuntu Clang",
-                          image: ubuntu-22.04,
-                          os: linux,
-                          toolchain: unix,
-                          cc: clang-15,
-                          cxx: clang++-15,
-                          packages: "clang-15 clang++-15",
-                      }
-                    - {
-                          name: "Windows MSVC",
-                          image: windows-2022,
-                          os: windows,
-                          toolchain: msvc,
-                          cc: cl,
-                          cxx: cl,
-                      }
-                    - {
-                          name: "Windows Clang",
-                          image: windows-2022,
-                          os: windows,
-                          toolchain: msvc-clang,
-                          cc: clang,
-                          cxx: clang++,
-                      }
-                    - {
-                          name: "Windows MinGW",
-                          image: windows-2022,
-                          os: windows,
-                          toolchain: mingw,
-                          cc: gcc,
-                          cxx: g++,
-                      }
+                    - name: Linux GCC
+                      runner: ubuntu-22.04
+                      cc: gcc
+                      cxx: g++
 
-        env:
-            CC: ${{ matrix.config.cc }}
-            CXX: ${{ matrix.config.cxx }}
-            CMAKE_BUILD_PARALLEL_LEVEL: 4
+                    - name: Linux Clang
+                      runner: ubuntu-22.04
+                      cc: clang
+                      cxx: clang++
+
+                    - name: Windows MSVC
+                      runner: windows-2022
+                      cc: cl
+                      cxx: cl
+                      generator: "Visual Studio 17 2022"
+
+                    - name: Windows Clang
+                      runner: windows-2022
+                      cc: clang-cl
+                      cxx: clang-cl
+                      generator: "Visual Studio 17 2022"
+
+                    - name: Windows MinGW
+                      runner: windows-2022
+                      cc: gcc
+                      cxx: g++
+                      generator: "MinGW Makefiles"
 
         steps:
-            - name: Checkout repository
+            - name: Checkout
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
-            # Install dependencies
-            - name: Install Linux dependencies
-              if: matrix.config.os == 'linux' && matrix.config.packages
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y ${{ matrix.config.packages }} cmake ninja-build
-
-            - name: Setup MSVC environment
-              if: matrix.config.toolchain == 'msvc' || matrix.config.toolchain == 'msvc-clang'
+            - name: Setup MSVC
+              if: contains(matrix.config.name, 'MSVC') || contains(matrix.config.name, 'Clang')
               uses: ilammy/msvc-dev-cmd@v1
-              with:
-                  arch: x64
 
-            - name: Setup MinGW environment
-              if: matrix.config.toolchain == 'mingw'
-              uses: msys2/setup-msys2@v2
-              with:
-                  msystem: MINGW64
-                  update: true
-                  install: >-
-                      mingw-w64-x86_64-gcc
-                      mingw-w64-x86_64-cmake
-                      mingw-w64-x86_64-ninja
-                      make
+            - name: Setup MinGW
+              if: contains(matrix.config.name, 'MinGW')
+              run: echo "${{ runner.temp }}\msys64\mingw64\bin" >> $GITHUB_PATH
 
-            # Cache CMake build directory
-            - name: Cache CMake build
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      build
-                      ~/.cache/cmake
-                  key: cmake-${{ runner.os }}-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
-                  restore-keys: |
-                      cmake-${{ runner.os }}-${{ matrix.config.name }}-
-                      cmake-${{ runner.os }}-
-
-            # Build and test steps
-            - name: Configure and build (Unix)
-              if: matrix.config.toolchain == 'unix'
+            - name: Configure
               run: |
-                  cmake -B build -G Ninja \
-                    -DCMAKE_BUILD_TYPE=Debug \
+                  cmake -B build \
                     -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
-                    -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
-                  cmake --build build --parallel
+                    -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} \
+                    ${{ matrix.config.generator && format('-G "{0}"', matrix.config.generator) || '' }}
 
-            - name: Configure and build (MSVC)
-              if: matrix.config.toolchain == 'msvc' || matrix.config.toolchain == 'msvc-clang'
-              shell: cmd
-              run: |
-                  cmake -B build -G "Visual Studio 17 2022" -A x64 ^
-                    -DCMAKE_BUILD_TYPE=Debug
-                  cmake --build build --config Debug --parallel
+            - name: Build
+              run: cmake --build build --config Release --parallel
 
-            - name: Configure and build (MinGW)
-              if: matrix.config.toolchain == 'mingw'
-              shell: msys2 {0}
-              run: |
-                  cmake -B build -G "MinGW Makefiles" \
-                    -DCMAKE_BUILD_TYPE=Debug \
-                    -DCMAKE_C_COMPILER=gcc \
-                    -DCMAKE_CXX_COMPILER=g++
-                  cmake --build build --parallel
-
-            # Run tests
-            - name: Run tests (Unix)
-              if: matrix.config.toolchain == 'unix'
+            - name: Test
               working-directory: build
-              run: ctest --output-on-failure --parallel 4
+              run: ctest --output-on-failure --parallel --build-config Release
 
-            - name: Run tests (MSVC)
-              if: matrix.config.toolchain == 'msvc' || matrix.config.toolchain == 'msvc-clang'
-              working-directory: build
-              run: ctest --output-on-failure --parallel 4 --build-config Debug
-
-            - name: Run tests (MinGW)
-              if: matrix.config.toolchain == 'mingw'
-              shell: msys2 {0}
-              working-directory: build
-              run: ctest --output-on-failure --parallel 4
-
-            # Upload artifacts
-            - name: Upload test artifacts
+            - name: Upload Artifacts
               uses: actions/upload-artifact@v4
-              if: always()
+              if: success() || failure()
               with:
-                  name: test-results-${{ matrix.config.name }}-${{ github.run_number }}
+                  name: logs-${{ matrix.config.name }}-${{ github.run_number }}
                   path: |
-                      build/**/Testing/
-                      build/**/*.log
-                      build/**/logs/
+                      build/**/logs/*.log
+                      build/**/logs/*.mocha
+                  if-no-files-found: ignore
                   retention-days: 7
 
-            # Generate test report
-            - name: Generate test report
+            - name: Test Report
               uses: dorny/test-reporter@v1
-              if: always() && hashFiles('build/Testing/*/Test.xml') != ''
+              if: success() || failure()
               with:
                   name: Test Results (${{ matrix.config.name }})
-                  path: "build/Testing/*/Test.xml"
-                  reporter: java-junit
+                  path: build/**/logs/*.mocha
+                  reporter: mocha-json
                   fail-on-error: false
-
-    # Summary job that depends on all test jobs
-    test-summary:
-        name: Test Summary
-        runs-on: ubuntu-22.04
-        needs: [test]
-        if: always()
-
-        steps:
-            - name: Check test results
-              run: |
-                  if [[ "${{ needs.test.result }}" == "failure" ]]; then
-                    echo "❌ Some tests failed"
-                    exit 1
-                  elif [[ "${{ needs.test.result }}" == "cancelled" ]]; then
-                    echo "⏸️ Tests were cancelled"
-                    exit 1
-                  else
-                    echo "✅ All tests passed"
-                  fi
-
-            - name: Create job summary
-              run: |
-                  echo "## Test Results Summary 📊" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "| Configuration | Status |" >> $GITHUB_STEP_SUMMARY
-                  echo "|---------------|--------|" >> $GITHUB_STEP_SUMMARY
-
-                  # This would need to be enhanced with actual results parsing
-                  # For now, showing the structure
-                  echo "| Ubuntu GCC | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| Ubuntu Clang | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| Windows MSVC | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| Windows Clang | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| Windows MinGW | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
