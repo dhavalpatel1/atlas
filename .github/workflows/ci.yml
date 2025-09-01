@@ -70,7 +70,7 @@ jobs:
               run: cmake -B build -G 'MinGW Makefiles' && cd build && mingw32-make -k test
 
             - name: archive-logs
-              uses: action/upload-artifact@v2
+              uses: actions/upload-artifact@v2
               if: success() || failure()
               with:
                   name: logs-${{matrix.config.name}}
