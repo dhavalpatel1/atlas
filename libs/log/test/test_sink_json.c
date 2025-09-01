@@ -35,11 +35,11 @@ spec(sink_json) {
 
         JsonResult result;
         json_read(jsonDoc, dynstring_view(&buffer), &result);
-        anvil_eq_u64(result.type, JsonResultType_Success);
+        anvil_eq_int(result.type, JsonResultType_Success);
 
         anvil_eq_string(json_string(jsonDoc, json_field(jsonDoc, result.val, string_lit("message"))), string_lit("Hello World"));
         anvil_eq_string(json_string(jsonDoc, json_field(jsonDoc, result.val, string_lit("level"))), string_lit("INFO"));
-        anvil_eq_f64(json_number(jsonDoc, json_field(jsonDoc, result.val, string_lit("line"))), 31, 1e-6);
+        anvil_eq_float(json_number(jsonDoc, json_field(jsonDoc, result.val, string_lit("line"))), 31, 1e-6);
     }
 
     it("supports log messages with parameters") {
@@ -50,10 +50,10 @@ spec(sink_json) {
 
         JsonResult result;
         json_read(jsonDoc, dynstring_view(&buffer), &result);
-        anvil_eq_u64(result.type, JsonResultType_Success);
+        anvil_eq_int(result.type, JsonResultType_Success);
 
         JsonVal extraObj = json_field(jsonDoc, result.val, string_lit("extra"));
-        anvil_eq_f64(json_number(jsonDoc, json_field(jsonDoc, extraObj, string_lit("param"))), 42, 1e-6);
+        anvil_eq_float(json_number(jsonDoc, json_field(jsonDoc, extraObj, string_lit("param"))), 42, 1e-6);
     }
 
     it("supports list parameters") {
@@ -64,15 +64,15 @@ spec(sink_json) {
 
         JsonResult result;
         json_read(jsonDoc, dynstring_view(&buffer), &result);
-        anvil_eq_u64(result.type, JsonResultType_Success);
+        anvil_eq_int(result.type, JsonResultType_Success);
 
         JsonVal extraObj = json_field(jsonDoc, result.val, string_lit("extra"));
         JsonVal paramArr = json_field(jsonDoc, extraObj, string_lit("param"));
 
-        anvil_eq_u64(json_elem_count(jsonDoc, paramArr), 3);
-        anvil_eq_f64(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 0)), 1, 1e6);
-        anvil_eq_f64(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 1)), 2, 1e6);
-        anvil_eq_f64(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 2)), 3, 1e6);
+        anvil_eq_int(json_elem_count(jsonDoc, paramArr), 3);
+        anvil_eq_float(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 0)), 1, 1e6);
+        anvil_eq_float(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 1)), 2, 1e6);
+        anvil_eq_float(json_number(jsonDoc, json_elem(jsonDoc, paramArr, 2)), 3, 1e6);
     }
 
     it("supports formatted messages") {
@@ -83,7 +83,7 @@ spec(sink_json) {
 
         JsonResult result;
         json_read(jsonDoc, dynstring_view(&buffer), &result);
-        anvil_eq_u64(result.type, JsonResultType_Success);
+        anvil_eq_int(result.type, JsonResultType_Success);
 
         anvil_eq_string(json_string(jsonDoc, json_field(jsonDoc, result.val, string_lit("message"))), string_lit("Hello42World"));
     }

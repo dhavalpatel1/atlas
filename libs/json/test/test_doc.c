@@ -11,42 +11,42 @@ spec(doc) {
     it("can retrieve the value of a string") {
         const JsonVal str = json_add_string(doc, string_lit("Hello World"));
 
-        anvil_eq_u64(json_type(doc, str), JsonType_String);
+        anvil_eq_int(json_type(doc, str), JsonType_String);
         anvil_eq_string(json_string(doc, str), string_lit("Hello World"));
     }
 
     it("can store an empty string") {
         const JsonVal str = json_add_string(doc, string_empty);
 
-        anvil_eq_u64(json_type(doc, str), JsonType_String);
+        anvil_eq_int(json_type(doc, str), JsonType_String);
         anvil_eq_string(json_string(doc, str), string_empty);
     }
 
     it("can retrieve the value of a number") {
         const JsonVal val = json_add_number(doc, 42.1337);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Number);
-        anvil_eq_f64(json_number(doc, val), 42.1337, .1e-32);
+        anvil_eq_int(json_type(doc, val), JsonType_Number);
+        anvil_eq_float(json_number(doc, val), 42.1337, .1e-32);
     }
 
     it("can retrieve the value of a boolean") {
         const JsonVal val = json_add_bool(doc, true);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Bool);
+        anvil_eq_int(json_type(doc, val), JsonType_Bool);
         anvil(json_bool(doc, val));
     }
 
     it("can retrieve the type of null") {
         const JsonVal val = json_add_null(doc);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Null);
+        anvil_eq_int(json_type(doc, val), JsonType_Null);
     }
 
     it("can store empty arrays") {
         const JsonVal val = json_add_array(doc);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Array);
-        anvil_eq_u64(json_elem_count(doc, val), 0);
+        anvil_eq_int(json_type(doc, val), JsonType_Array);
+        anvil_eq_int(json_elem_count(doc, val), 0);
         anvil(sentinel_check(json_elem_begin(doc, val)));
     }
 
@@ -54,15 +54,15 @@ spec(doc) {
         const JsonVal val  = json_add_array(doc);
         const JsonVal elem = json_add_string(doc, string_lit("Hello World"));
 
-        anvil_eq_u64(json_parent(doc, elem), JsonParent_None);
+        anvil_eq_int(json_parent(doc, elem), JsonParent_None);
 
         json_add_elem(doc, val, elem);
 
-        anvil_eq_u64(json_parent(doc, elem), JsonParent_Array);
+        anvil_eq_int(json_parent(doc, elem), JsonParent_Array);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Array);
-        anvil_eq_u64(json_elem_count(doc, val), 1);
-        anvil_eq_u64(json_elem_begin(doc, val), elem);
+        anvil_eq_int(json_type(doc, val), JsonType_Array);
+        anvil_eq_int(json_elem_count(doc, val), 1);
+        anvil_eq_int(json_elem_begin(doc, val), elem);
         anvil(sentinel_check(json_elem_next(doc, elem)));
     }
 
@@ -77,9 +77,9 @@ spec(doc) {
         json_add_elem(doc, val, elemVal2);
         json_add_elem(doc, val, elemVal3);
 
-        anvil_eq_u64(json_elem(doc, val, 0), elemVal1);
-        anvil_eq_u64(json_elem(doc, val, 1), elemVal2);
-        anvil_eq_u64(json_elem(doc, val, 2), elemVal3);
+        anvil_eq_int(json_elem(doc, val, 0), elemVal1);
+        anvil_eq_int(json_elem(doc, val, 1), elemVal2);
+        anvil_eq_int(json_elem(doc, val, 2), elemVal3);
         anvil(sentinel_check(json_elem(doc, val, 3)));
         anvil(sentinel_check(json_elem(doc, val, 42)));
     }
@@ -95,27 +95,27 @@ spec(doc) {
         json_for_elems(doc, val, elem, {
             switch (i++) {
                 case 0:
-                    anvil_eq_u64(json_type(doc, elem), JsonType_String);
+                    anvil_eq_int(json_type(doc, elem), JsonType_String);
                     break;
                 case 1:
-                    anvil_eq_u64(json_type(doc, elem), JsonType_Bool);
+                    anvil_eq_int(json_type(doc, elem), JsonType_Bool);
                     break;
                 case 2:
-                    anvil_eq_u64(json_type(doc, elem), JsonType_Null);
+                    anvil_eq_int(json_type(doc, elem), JsonType_Null);
                     break;
                 default:
                     anvil(false);
             }
         });
 
-        anvil_eq_u64(json_elem_count(doc, val), 3);
+        anvil_eq_int(json_elem_count(doc, val), 3);
     }
 
     it("can store empty objects") {
         const JsonVal val = json_add_object(doc);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Object);
-        anvil_eq_u64(json_field_count(doc, val), 0);
+        anvil_eq_int(json_type(doc, val), JsonType_Object);
+        anvil_eq_int(json_field_count(doc, val), 0);
 
         anvil_eq_string(json_field_begin(doc, val).name, string_empty);
         anvil(sentinel_check(json_field_begin(doc, val).value));
@@ -125,17 +125,17 @@ spec(doc) {
         const JsonVal val   = json_add_object(doc);
         const JsonVal field = json_add_string(doc, string_lit("Hello World"));
 
-        anvil_eq_u64(json_parent(doc, field), JsonParent_None);
+        anvil_eq_int(json_parent(doc, field), JsonParent_None);
 
         const bool res = json_add_field_str(doc, val, string_lit("a"), field);
         anvil(res);
 
-        anvil_eq_u64(json_parent(doc, field), JsonParent_Object);
+        anvil_eq_int(json_parent(doc, field), JsonParent_Object);
 
-        anvil_eq_u64(json_type(doc, val), JsonType_Object);
-        anvil_eq_u64(json_field_count(doc, val), 1);
+        anvil_eq_int(json_type(doc, val), JsonType_Object);
+        anvil_eq_int(json_field_count(doc, val), 1);
         anvil_eq_string(json_field_begin(doc, val).name, string_lit("a"));
-        anvil_eq_u64(json_field_begin(doc, val).value, field);
+        anvil_eq_int(json_field_begin(doc, val).value, field);
         anvil(
             sentinel_check(json_field_next(doc, field).value));
     }
@@ -151,9 +151,9 @@ spec(doc) {
         json_add_field_str(doc, val, string_lit("b"), fieldVal2);
         json_add_field_str(doc, val, string_lit("c"), fieldVal3);
 
-        anvil_eq_u64(json_field(doc, val, string_lit("a")), fieldVal1);
-        anvil_eq_u64(json_field(doc, val, string_lit("b")), fieldVal2);
-        anvil_eq_u64(json_field(doc, val, string_lit("c")), fieldVal3);
+        anvil_eq_int(json_field(doc, val, string_lit("a")), fieldVal1);
+        anvil_eq_int(json_field(doc, val, string_lit("b")), fieldVal2);
+        anvil_eq_int(json_field(doc, val, string_lit("c")), fieldVal3);
         anvil(sentinel_check(json_field(doc, val, string_lit("d"))));
         anvil(sentinel_check(json_field(doc, val, string_lit(""))));
     }
@@ -172,22 +172,22 @@ spec(doc) {
             switch (i++) {
                 case 0:
                     anvil_eq_string(itr.name, string_lit("a"));
-                    anvil_eq_u64(json_type(doc, itr.value), JsonType_String);
+                    anvil_eq_int(json_type(doc, itr.value), JsonType_String);
                     break;
                 case 1:
                     anvil_eq_string(itr.name, string_lit("b"));
-                    anvil_eq_u64(json_type(doc, itr.value), JsonType_Bool);
+                    anvil_eq_int(json_type(doc, itr.value), JsonType_Bool);
                     break;
                 case 2:
                     anvil_eq_string(itr.name, string_lit("c"));
-                    anvil_eq_u64(json_type(doc, itr.value), JsonType_Null);
+                    anvil_eq_int(json_type(doc, itr.value), JsonType_Null);
                     break;
                 default:
                     anvil(false);
             }
         });
 
-        anvil_eq_u64(json_field_count(doc, val), 3);
+        anvil_eq_int(json_field_count(doc, val), 3);
     }
 
     it("returns false when adding two fields with the same name to an object") {
@@ -227,15 +227,15 @@ spec(doc) {
 
                     anvil(json_bool(doc, elem0));
                     anvil(!json_bool(doc, elem1));
-                    anvil_eq_u64(json_type(doc, json_field(doc, elem2, string_lit("a"))), JsonType_Null);
+                    anvil_eq_int(json_type(doc, json_field(doc, elem2, string_lit("a"))), JsonType_Null);
                     anvil_eq_string(
                         json_string(doc, json_field(doc, elem2, string_lit("b"))), string_lit("Hello"));
                 } break;
                 case 1:
-                    anvil_eq_f64(json_number(doc, rootItr.value), 42.0, .1e-32);
+                    anvil_eq_float(json_number(doc, rootItr.value), 42.0, .1e-32);
                     break;
                 case 2:
-                    anvil_eq_u64(
+                    anvil_eq_int(
                         json_type(doc, json_field(doc, rootItr.value, string_lit("a"))), JsonType_Null);
                     break;
             }

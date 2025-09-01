@@ -72,41 +72,21 @@ typedef struct {
 
 #define anvil_require(_CONDITION_) anvil_require_msg(_CONDITION_, #_CONDITION_)
 
-#define anvil_eq_u64(_A_, _B_)                                         \
-    do {                                                               \
-        const u64 _a_ = (_A_);                                         \
-        const u64 _b_ = (_B_);                                         \
-                                                                       \
-        anvil_msg(_a_ == _b_, "{} == {}", fmt_int(_a_), fmt_int(_b_)); \
-    } while (false)
+#define anvil_eq_int(_A_, _B_)                                            \
+    _Generic((_A_),                                                       \
+        u8:  anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        u16: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        u32: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        u64: anvil_eq_u64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        i8:  anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        i16: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        i32: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location()), \
+        i64: anvil_eq_i64_raw(_testCtx, (_A_), (_B_), source_location())  \
+    )
 
-#define anvil_eq_i64(_A_, _B_)                                         \
-    do {                                                               \
-        const i64 _a_ = (_A_);                                         \
-        const i64 _b_ = (_B_);                                         \
-                                                                        \
-        anvil_msg(_a_ == _b_, "{} == {}", fmt_int(_a_), fmt_int(_b_)); \
-    } while (false)
+#define anvil_eq_float(_A_, _B_, _THRESHOLD_) anvil_eq_f64_raw(_testCtx, (_A_), (_B_), (_THRESHOLD_), source_location())
 
-#define anvil_eq_f64(_A_, _B_, _THRESHOLD_)                                                        \
-    do {                                                                                             \
-        const f64 _a_ = (_A_);                                                                       \
-        const f64 _b_ = (_B_);                                                                       \
-                                                                                                     \
-        anvil_msg(math_abs(_a_ - _b_) <= (_THRESHOLD_), "{} == {}", fmt_float(_a_), fmt_float(_b_)); \
-    } while (false)
-
-#define anvil_eq_string(_A_, _B_)                                         \
-    do {                                                                  \
-        const String _a_ = (_A_);                                         \
-        const String _b_ = (_B_);                                         \
-                                                                          \
-        anvil_msg(                                                        \
-            string_eq(_a_, _b_),                                          \
-            "'{}' == '{}'",                                               \
-            fmt_text(_a_, .flags = FormatTextFlags_EscapeNonPrintAscii),  \
-            fmt_text(_b_, .flags = FormatTextFlags_EscapeNonPrintAscii)); \
-    } while (false)
+#define anvil_eq_string(_A_, _B_) anvil_eq_string_raw(_testCtx, (_A_), (_B_), source_location())
 
 bool anvil_visit_setup(AnvilSpecContext*);
 
@@ -115,5 +95,13 @@ bool anvil_visit_teardown(AnvilSpecContext*);
 AnvilTestContext* anvil_visit_test(AnvilSpecContext*, AnvilTest);
 
 void anvil_report_error(AnvilTestContext*, String msg, SourceLoc);
+
+void anvil_eq_u64_raw(AnvilTestContext*, u64 a, u64 b, SourceLoc);
+
+void anvil_eq_i64_raw(AnvilTestContext*, i64 a, i64 b, SourceLoc);
+
+void anvil_eq_f64_raw(AnvilTestContext*, f64 a, f64 b, f64 threshold, SourceLoc);
+
+void anvil_eq_string_raw(AnvilTestContext*, String a, String b, SourceLoc);
 
 NORETURN void anvil_finish(AnvilTestContext*);

@@ -5,7 +5,7 @@
 #include "anvil_spec.h"
 
 static void parse_check_success(AnvilTestContext* _testCtx, CliInvocation* invoc) {
-    anvil_eq_u64(cli_parse_result(invoc), CliParseResult_Success);
+    anvil_eq_int(cli_parse_result(invoc), CliParseResult_Success);
 
     for (usize i = 0; i != cli_parse_errors(invoc).count; ++i) {
         anvil_eq_string(cli_parse_errors(invoc).head[i], string_empty);
@@ -14,9 +14,9 @@ static void parse_check_success(AnvilTestContext* _testCtx, CliInvocation* invoc
 
 static void parse_check_fail(
     AnvilTestContext* _testCtx, CliInvocation* invoc, const String* errHead, const usize errCount) {
-    anvil_eq_u64(cli_parse_result(invoc), CliParseResult_Fail);
+    anvil_eq_int(cli_parse_result(invoc), CliParseResult_Fail);
 
-    anvil_eq_u64(cli_parse_errors(invoc).count, errCount);
+    anvil_eq_int(cli_parse_errors(invoc).count, errCount);
     const usize errsToCheck = math_min(errCount, cli_parse_errors(invoc).count);
     for (usize i = 0; i != errsToCheck; ++i) {
         anvil_eq_string(cli_parse_errors(invoc).head[i], errHead[i]);
@@ -24,7 +24,7 @@ static void parse_check_fail(
 }
 
 static void parse_check_values(AnvilTestContext* _testCtx, CliInvocation* invoc, const CliId id, const String* valHead, const usize valCount) {
-    anvil_eq_u64(cli_parse_values(invoc, id).count, valCount);
+    anvil_eq_int(cli_parse_values(invoc, id).count, valCount);
     const usize valsToCheck = math_min(valCount, cli_parse_values(invoc, id).count);
     for (usize i = 0; i != valsToCheck; ++i) {
         anvil_eq_string(cli_parse_values(invoc, id).head[i], valHead[i]);

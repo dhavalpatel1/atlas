@@ -56,7 +56,7 @@ spec(logger) {
         log(logger, LogLevel_Error, "Hello World");
 
         SinkTestMsg* msg = dynarray_at_t(&sink.messages, 0, SinkTestMsg);
-        anvil_eq_u64(msg->level, LogLevel_Error);
+        anvil_eq_int(msg->level, LogLevel_Error);
         anvil_eq_string(msg->message, string_lit("Hello World"));
     }
 

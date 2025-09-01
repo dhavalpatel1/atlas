@@ -6,7 +6,7 @@ spec(dynstring) {
 
     it("can create an empty Dynamic-String") {
         DynString string = dynstring_create_over(mem_stack(128));
-        anvil_eq_u64(string.size, 0);
+        anvil_eq_int(string.size, 0);
         dynstring_destroy(&string);
     }
 

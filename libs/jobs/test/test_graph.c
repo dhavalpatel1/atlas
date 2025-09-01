@@ -17,7 +17,7 @@ spec(graph) {
         const JobTaskId taskA = jobs_graph_add_task(job, string_lit("TestTaskA"), null, mem_empty);
         const JobTaskId taskB = jobs_graph_add_task(job, string_lit("TestTaskB"), null, mem_empty);
 
-        anvil_eq_u64(jobs_graph_task_count(job), 2);
+        anvil_eq_int(jobs_graph_task_count(job), 2);
         anvil_eq_string(jobs_graph_task_name(job, taskA), string_lit("TestTaskA"));
         anvil_eq_string(jobs_graph_task_name(job, taskB), string_lit("TestTaskB"));
 
@@ -32,16 +32,16 @@ spec(graph) {
         const JobTaskId c = jobs_graph_add_task(job, string_lit("C"), null, mem_empty);
         const JobTaskId d = jobs_graph_add_task(job, string_lit("D"), null, mem_empty);
 
-        anvil_eq_u64(jobs_graph_task_count(job), 4);
+        anvil_eq_int(jobs_graph_task_count(job), 4);
 
         jobs_graph_task_depend(job, a, d);
         jobs_graph_task_depend(job, b, d);
         jobs_graph_task_depend(job, c, d);
 
-        anvil_eq_u64(jobs_graph_task_span(job), 2);
+        anvil_eq_int(jobs_graph_task_span(job), 2);
         anvil(jobs_graph_validate(job));
-        anvil_eq_u64(jobs_graph_task_root_count(job), 3);
-        anvil_eq_u64(jobs_graph_task_leaf_count(job), 1);
+        anvil_eq_int(jobs_graph_task_root_count(job), 3);
+        anvil_eq_int(jobs_graph_task_leaf_count(job), 1);
 
         anvil(jobs_graph_task_has_parent(job, d));
         anvil(!jobs_graph_task_has_parent(job, a));
@@ -53,9 +53,9 @@ spec(graph) {
         anvil(jobs_graph_task_has_child(job, c));
         anvil(!jobs_graph_task_has_child(job, d));
 
-        anvil_eq_u64(jobs_graph_task_child_begin(job, a).task, d);
-        anvil_eq_u64(jobs_graph_task_child_begin(job, b).task, d);
-        anvil_eq_u64(jobs_graph_task_child_begin(job, c).task, d);
+        anvil_eq_int(jobs_graph_task_child_begin(job, a).task, d);
+        anvil_eq_int(jobs_graph_task_child_begin(job, b).task, d);
+        anvil_eq_int(jobs_graph_task_child_begin(job, c).task, d);
         anvil(sentinel_check(jobs_graph_task_child_begin(job, d).task));
 
         jobs_graph_destroy(job);
@@ -69,16 +69,16 @@ spec(graph) {
         const JobTaskId c = jobs_graph_add_task(job, string_lit("C"), null, mem_empty);
         const JobTaskId d = jobs_graph_add_task(job, string_lit("D"), null, mem_empty);
 
-        anvil_eq_u64(jobs_graph_task_count(job), 4);
+        anvil_eq_int(jobs_graph_task_count(job), 4);
 
         jobs_graph_task_depend(job, a, b);
         jobs_graph_task_depend(job, a, c);
         jobs_graph_task_depend(job, a, d);
 
         anvil(jobs_graph_validate(job));
-        anvil_eq_u64(jobs_graph_task_span(job), 2);
-        anvil_eq_u64(jobs_graph_task_root_count(job), 1);
-        anvil_eq_u64(jobs_graph_task_leaf_count(job), 3);
+        anvil_eq_int(jobs_graph_task_span(job), 2);
+        anvil_eq_int(jobs_graph_task_root_count(job), 1);
+        anvil_eq_int(jobs_graph_task_leaf_count(job), 3);
 
         anvil(!jobs_graph_task_has_parent(job, a));
         anvil(jobs_graph_task_has_parent(job, b));
@@ -91,11 +91,11 @@ spec(graph) {
         anvil(!jobs_graph_task_has_child(job, d));
 
         JobTaskChildItr itr = jobs_graph_task_child_begin(job, a);
-        anvil_eq_u64(itr.task, b);
+        anvil_eq_int(itr.task, b);
         itr = jobs_graph_task_child_next(job, itr);
-        anvil_eq_u64(itr.task, c);
+        anvil_eq_int(itr.task, c);
         itr = jobs_graph_task_child_next(job, itr);
-        anvil_eq_u64(itr.task, d);
+        anvil_eq_int(itr.task, d);
         itr = jobs_graph_task_child_next(job, itr);
         anvil(sentinel_check(itr.task));
 
@@ -160,9 +160,9 @@ spec(graph) {
         jobs_graph_task_depend(job, f, g);
 
         anvil(jobs_graph_validate(job));
-        anvil_eq_u64(jobs_graph_task_span(job), 7);
-        anvil_eq_u64(jobs_graph_task_root_count(job), 1);
-        anvil_eq_u64(jobs_graph_task_leaf_count(job), 1);
+        anvil_eq_int(jobs_graph_task_span(job), 7);
+        anvil_eq_int(jobs_graph_task_root_count(job), 1);
+        anvil_eq_int(jobs_graph_task_leaf_count(job), 1);
 
         jobs_graph_destroy(job);
     }
@@ -179,9 +179,9 @@ spec(graph) {
         jobs_graph_add_task(job, string_lit("G"), null, mem_empty);
 
         anvil(jobs_graph_validate(job));
-        anvil_eq_u64(jobs_graph_task_span(job), 1);
-        anvil_eq_u64(jobs_graph_task_root_count(job), 7);
-        anvil_eq_u64(jobs_graph_task_leaf_count(job), 7);
+        anvil_eq_int(jobs_graph_task_span(job), 1);
+        anvil_eq_int(jobs_graph_task_root_count(job), 7);
+        anvil_eq_int(jobs_graph_task_leaf_count(job), 7);
 
         jobs_graph_destroy(job);
     }
@@ -231,10 +231,10 @@ spec(graph) {
         jobs_graph_task_depend(job, p, m);
 
         anvil(jobs_graph_validate(job));
-        anvil_eq_u64(jobs_graph_task_span(job), 9);
-        anvil_eq_f64(jobs_graph_task_parallelism(job), 2.0f, 1e-6f);
-        anvil_eq_u64(jobs_graph_task_root_count(job), 1);
-        anvil_eq_u64(jobs_graph_task_leaf_count(job), 1);
+        anvil_eq_int(jobs_graph_task_span(job), 9);
+        anvil_eq_float(jobs_graph_task_parallelism(job), 2.0f, 1e-6f);
+        anvil_eq_int(jobs_graph_task_root_count(job), 1);
+        anvil_eq_int(jobs_graph_task_leaf_count(job), 1);
 
         jobs_graph_destroy(job);
     }

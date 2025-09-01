@@ -133,10 +133,10 @@ spec(path) {
 
     it("can generate a tiemstampped file-name") {
         const String nameWithoutPrefix = path_name_timestamp_scratch(string_empty);
-        anvil_eq_u64(nameWithoutPrefix.size, 15);
+        anvil_eq_int(nameWithoutPrefix.size, 15);
 
         const String nameWithPrefix = path_name_timestamp_scratch(string_lit("hello"));
-        anvil_eq_u64(nameWithPrefix.size, 21);
+        anvil_eq_int(nameWithPrefix.size, 21);
     }
 
     it("can retrieve the executable path") {

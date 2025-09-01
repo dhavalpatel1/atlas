@@ -1,7 +1,9 @@
 #include "anvil_spec.h"
 
 #include "core_alloc.h"
+#include "core_annotation.h"
 #include "core_diag.h"
+#include "core_format.h"
 #include "core_time.h"
 
 #include "spec_internal.h"
@@ -88,7 +90,7 @@ AnvilResult* anvil_exec_test(Allocator* alloc, const AnvilSpec* spec, const Anvi
 FinishedLabel:
     if (finished) {
         diag_set_assert_handler(null, null);
-        
+
         const TimeSteady endTime = time_steady_clock();
         const TimeDuration duration = time_steady_duration(startTime, endTime);
 
@@ -117,6 +119,34 @@ FinishedLabel:
 void anvil_report_error(AnvilTestContext* ctx, String msg, const SourceLoc source) {
     diag_break();
     anvil_result_error(ctx->result, msg, source);
+}
+
+void anvil_eq_u64_raw(AnvilTestContext* ctx, const u64 a, const u64 b, const SourceLoc source) {
+    if (UNLIKELY(a != b)) {
+        anvil_report_error(ctx, fmt_write_scratch("{} == {}", fmt_int(a), fmt_int(b)), source);
+    }
+}
+
+void anvil_eq_i64_raw(AnvilTestContext* ctx, const i64 a, const i64 b, const SourceLoc source) {
+    if (UNLIKELY(a != b)) {
+        anvil_report_error(ctx, fmt_write_scratch("{} == {}", fmt_int(a), fmt_int(b)), source);
+    }
+}
+
+void anvil_eq_f64_raw(AnvilTestContext* ctx, const f64 a, const f64 b, const f64 threshold, const SourceLoc source) {
+    if (UNLIKELY(math_abs(a - b) > threshold)) {
+        anvil_report_error(ctx, fmt_write_scratch("{} == {}", fmt_float(a), fmt_float(b)), source);
+    }
+}
+
+void anvil_eq_string_raw(AnvilTestContext* ctx, const String a, const String b, const SourceLoc source) {
+    if (UNLIKELY(!string_eq(a, b))) {
+        anvil_report_error(ctx, fmt_write_scratch("'{}' == '{}'",
+            fmt_text(a, .flags = FormatTextFlags_EscapeNonPrintAscii),
+            fmt_text(b, .flags = FormatTextFlags_EscapeNonPrintAscii)),
+            source
+        );
+    }
 }
 
 NORETURN void anvil_finish(AnvilTestContext* ctx) {

@@ -56,10 +56,10 @@ spec(executor) {
         }
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, numTasks);
+        anvil_eq_int((usize)counter, numTasks);
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, numTasks * 2);
+        anvil_eq_int((usize)counter, numTasks * 2);
 
         jobs_graph_destroy(jobGraph);
     }
@@ -90,10 +90,10 @@ spec(executor) {
         }
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, 0);
+        anvil_eq_int((usize)counter, 0);
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, 0);
+        anvil_eq_int((usize)counter, 0);
 
         jobs_graph_destroy(jobGraph);
     }
@@ -113,10 +113,10 @@ spec(executor) {
         }
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, numTasks);
+        anvil_eq_int((usize)counter, numTasks);
 
         jobs_scheduler_wait_help(jobs_scheduler_run(jobGraph));
-        anvil_eq_u64((usize)counter, numTasks * 2);
+        anvil_eq_int((usize)counter, numTasks * 2);
 
         jobs_graph_destroy(jobGraph);
     }
@@ -152,7 +152,7 @@ spec(executor) {
         }
 
         jobs_scheduler_wait_help(jobs_scheduler_run(graph));
-        anvil_eq_u64(data[0], sum);
+        anvil_eq_int(data[0], sum);
 
         dynarray_destroy(&dependencies);
         jobs_graph_destroy(graph);

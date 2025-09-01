@@ -11,16 +11,16 @@ spec(utf8) {
                       "⎳aⁱ-bⁱ⎟⎥⎪▁▂▃▄▅▆▇█∀∂∈ℝ∧∪≡∞");
 
     it("can count codepoints in a utf8 string") {
-        anvil_eq_u64(utf8_cp_count(string_lit("")), 0);
-        anvil_eq_u64(utf8_cp_count(string_lit("Hello")), 5);
-        anvil_eq_u64(utf8_cp_count(testStr), 184);
+        anvil_eq_int(utf8_cp_count(string_lit("")), 0);
+        anvil_eq_int(utf8_cp_count(string_lit("Hello")), 5);
+        anvil_eq_int(utf8_cp_count(testStr), 184);
     }
 
     it("can compute the required utf8 bytes") {
-        anvil_eq_u64(utf8_cp_bytes(0x26), 1);
-        anvil_eq_u64(utf8_cp_bytes(0x39B), 2);
-        anvil_eq_u64(utf8_cp_bytes(0xE3F), 3);
-        anvil_eq_u64(utf8_cp_bytes(0x1D459), 4);
+        anvil_eq_int(utf8_cp_bytes(0x26), 1);
+        anvil_eq_int(utf8_cp_bytes(0x39B), 2);
+        anvil_eq_int(utf8_cp_bytes(0xE3F), 3);
+        anvil_eq_int(utf8_cp_bytes(0x1D459), 4);
     }
 
     it("can encode codepoints as utf8") {

@@ -10,12 +10,12 @@ spec(dynarray) {
     }
 
     it("Is empty when created") {
-        anvil_eq_u64(array.size, 0);
+        anvil_eq_int(array.size, 0);
     }
 
     it("Increases in size when new elements are pushed") {
         *dynarray_push_t(&array, u64) = 42;
-        anvil_eq_u64(array.size, 1);
+        anvil_eq_int(array.size, 1);
     }
 
     it("Can be sorted") {
@@ -29,7 +29,7 @@ spec(dynarray) {
         dynarray_sort(&array, compare_u64);
 
         dynarray_for_t(&array, u64, itr, {
-            anvil_eq_u64(*itr, expected[itr_i]);
+            anvil_eq_int(*itr, expected[itr_i]);
         });
     }
 
