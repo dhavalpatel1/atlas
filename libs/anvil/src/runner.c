@@ -11,7 +11,9 @@
 #include "anvil_runner.h"
 
 #include "output_log.h"
+#include "output_mocha.h"
 #include "output_pretty.h"
+
 #include "spec_internal.h"
 
 typedef struct {
@@ -48,8 +50,9 @@ AnvilResultType anvil_run(AnvilDef* check, const AnvilRunFlags flags) {
     const TimeSteady startTime = time_steady_clock();
 
     AnvilOutput* outputs[] = {
-        anvil_output_pretty_create(g_alloc_heap, g_file_stdout, flags),
-        anvil_output_log_create(g_alloc_heap, g_logger)
+        anvil_output_pretty(g_alloc_heap, g_file_stdout, flags),
+        anvil_output_mocha_default(g_alloc_heap),
+        anvil_output_log(g_alloc_heap, g_logger)
     };
 
     AnvilRunContext ctx = {
@@ -73,7 +76,7 @@ AnvilResultType anvil_run(AnvilDef* check, const AnvilRunFlags flags) {
 
     const TimeDuration discoveryTime = time_steady_duration(startTime, time_steady_clock());
     array_for_t(outputs, AnvilOutput*, out, {
-        (*out)->testDiscovered(*out, numTests, discoveryTime);
+        (*out)->testDiscovered(*out, specs.size, numTests, discoveryTime);
     });
 
     JobGraph* graph = jobs_graph_create(g_alloc_heap, string_lit("tests"), numTests);
@@ -82,6 +85,11 @@ AnvilResultType anvil_run(AnvilDef* check, const AnvilRunFlags flags) {
         dynarray_for_t(&spec->tests, AnvilTest, test, {
             if (test->flags & AnvilTestFlags_Skip || (focus && !(test->flags & AnvilTestFlags_Focus))) {
                 ++numSkipped;
+
+                array_for_t(outputs, AnvilOutput*, out, {
+                    (*out)->testSkipped(*out, spec, test);
+                });
+
                 continue;
             }
 

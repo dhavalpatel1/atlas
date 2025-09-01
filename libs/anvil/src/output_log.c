@@ -1,4 +1,5 @@
 #include "anvil_runner.h"
+#include "anvil_spec.h"
 #include "core_alloc.h"
 #include "core_format.h"
 #include "core_path.h"
@@ -27,13 +28,20 @@ static void output_run_started(AnvilOutput* out) {
         log_param("executable", fmt_path(g_path_executable)));
 }
 
-static void output_tests_discovered(AnvilOutput* out, const usize count, const TimeDuration dur) {
+static void output_tests_discovered(AnvilOutput* out, const usize specCount, const usize testCount, const TimeDuration dur) {
     AnvilOutputLog* logOut = (AnvilOutputLog*)out;
 
     log(logOut->logger, LogLevel_Debug, "Test discovery complete",
-        log_param("count", fmt_int(count)),
+        log_param("spec-count", fmt_int(specCount)),
+        log_param("test-count", fmt_int(testCount)),
         log_param("duration", fmt_duration(dur))
     );
+}
+
+static void output_test_skipped(AnvilOutput* out, const AnvilSpec* spec, const AnvilTest* test) {
+    AnvilOutputLog* logOut = (AnvilOutputLog*)out;
+
+    log(logOut->logger, LogLevel_Info, "Test skipped", log_param("spec", fmt_text(spec->def->name)), log_param("test", fmt_text(test->description)));
 }
 
 static void output_test_finished(AnvilOutput* out, const AnvilSpec* spec, const AnvilTest* test, const AnvilResultType type, AnvilResult* result) {
@@ -72,12 +80,13 @@ static void output_destroy(AnvilOutput* out) {
     alloc_free_t(logOut->alloc, logOut);
 }
 
-AnvilOutput* anvil_output_log_create(Allocator* alloc, Logger* logger) {
+AnvilOutput* anvil_output_log(Allocator* alloc, Logger* logger) {
     AnvilOutputLog* logOut = alloc_alloc_t(alloc, AnvilOutputLog);
     *logOut = (AnvilOutputLog) {
         .api = {
             .runStarted = output_run_started,
             .testDiscovered = output_tests_discovered,
+            .testSkipped = output_test_skipped,
             .testFinished = output_test_finished,
             .runFinished = output_run_finished,
             .destroy = output_destroy,

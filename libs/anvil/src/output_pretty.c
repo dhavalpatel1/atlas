@@ -3,6 +3,7 @@
 #include "core_tty.h"
 
 #include "jobs_executor.h"
+#include "output.h"
 
 #include "output_pretty.h"
 
@@ -54,13 +55,14 @@ static void output_run_started(AnvilOutput* out) {
     output_write(prettyOut, str);
 }
 
-static void output_tests_discovered(AnvilOutput* out, const usize count, const TimeDuration dur) {
+static void output_tests_discovered(AnvilOutput* out, const usize specCount, const usize testCount, const TimeDuration dur) {
     AnvilOutputPretty* prettyOut = (AnvilOutputPretty*)out;
+    (void)specCount;
 
     const String str = fmt_write_scratch(
         "> Discovered {}{}{} tests. {}({}){}\n",
         arg_style_bold(prettyOut),
-        fmt_int(count),
+        fmt_int(testCount),
         arg_style_reset(prettyOut),
         arg_style_dim(prettyOut),
         fmt_duration(dur),
@@ -68,6 +70,12 @@ static void output_tests_discovered(AnvilOutput* out, const usize count, const T
     );
 
     output_write(prettyOut, str);
+}
+
+static void output_test_skipped(AnvilOutput* out, const AnvilSpec* spec, const AnvilTest* test) {
+    (void)out;
+    (void)spec;
+    (void)test;
 }
 
 static void output_test_finished(AnvilOutput* out, const AnvilSpec* spec, const AnvilTest* test, const AnvilResultType type, AnvilResult* result) {
@@ -137,12 +145,13 @@ static void output_destroy(AnvilOutput* out) {
     alloc_free_t(prettyOut->alloc, prettyOut);
 }
 
-AnvilOutput* anvil_output_pretty_create(Allocator* alloc, File* file, AnvilRunFlags runFlags) {
+AnvilOutput* anvil_output_pretty(Allocator* alloc, File* file, AnvilRunFlags runFlags) {
     AnvilOutputPretty* prettyOut = alloc_alloc_t(alloc, AnvilOutputPretty);
     *prettyOut = (AnvilOutputPretty) {
         .api = {
             .runStarted = output_run_started,
             .testDiscovered = output_tests_discovered,
+            .testSkipped = output_test_skipped,
             .testFinished = output_test_finished,
             .runFinished = output_run_finished,
             .destroy = output_destroy,

@@ -4,6 +4,7 @@ add_library(atlas_anvil STATIC
     src/def.c
     src/output.c
     src/output_log.c
+    src/output_mocha.c
     src/output_pretty.c
     src/result.c
     src/runner.c
@@ -24,5 +25,6 @@ add_executable(atlas_anvil_test
 target_link_libraries(atlas_anvil_test PRIVATE atlas_anvil)
 target_link_libraries(atlas_anvil_test PRIVATE atlas_cli)
 target_link_libraries(atlas_anvil_test PRIVATE atlas_log)
+target_link_libraries(atlas_anvil_test PRIVATE atlas_json)
 
 configure_test(atlas_anvil_test anvil)

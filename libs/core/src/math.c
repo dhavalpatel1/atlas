@@ -1,3 +1,4 @@
+#include "core_annotation.h"
 #include "core_array.h"
 #include "core_diag.h"
 #include "core_math.h"
@@ -47,4 +48,34 @@ FORCE_INLINE f32 math_sin_f32(const f32 val) {
 
 FORCE_INLINE f32 math_cos_f32(const f32 val) {
     return cosf(val);
+}
+
+FORCE_INLINE f64 math_trunc_f64(const f64 val) {
+    return (i64)val;
+}
+
+FORCE_INLINE f64 math_floor_f64(const f64 val) {
+    const f64 trunc = math_trunc_f64(val);
+
+    return trunc > val ? (trunc - 1) : trunc;
+}
+
+FORCE_INLINE f64 math_ceil_f64(const f64 val) {
+    const f64 trunc = math_trunc_f64(val);
+
+    return trunc < val ? (trunc + 1) : trunc;
+}
+
+f64 math_round_f64(const f64 val) {
+    const f64 trunc = math_trunc_f64(val);
+    const f64 frac = math_abs(val - trunc);
+    if (frac < 0.5) {
+        return trunc;
+    }
+
+    if (UNLIKELY(frac == 0.5)) {
+        return ((i64)trunc % 2) ? (trunc + math_sign(val)) : trunc;
+    }
+
+    return trunc + math_sign(val);
 }

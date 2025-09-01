@@ -9,7 +9,9 @@ typedef struct sAnvilOutput AnvilOutput;
 struct sAnvilOutput {
     void (*runStarted)(AnvilOutput*);
 
-    void (*testDiscovered)(AnvilOutput*, usize count, TimeDuration);
+    void (*testDiscovered)(AnvilOutput*, usize specCount, usize testCount, TimeDuration);
+
+    void (*testSkipped)(AnvilOutput*, const AnvilSpec*, const AnvilTest*);
 
     void (*testFinished)(AnvilOutput*, const AnvilSpec*, const AnvilTest*, AnvilResultType, AnvilResult*);
 

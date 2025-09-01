@@ -2,4 +2,4 @@
 
 #include "output.h"
 
-AnvilOutput* anvil_output_pretty_create(Allocator*, File*, AnvilRunFlags);
+AnvilOutput* anvil_output_pretty(Allocator*, File*, AnvilRunFlags);

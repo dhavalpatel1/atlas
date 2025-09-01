@@ -21,3 +21,11 @@ f32 math_log_f32(f32 x);
 f32 math_sin_f32(f32 x);
 
 f32 math_cos_f32(f32 x);
+
+f64 math_trunc_f64(f64);
+
+f64 math_floor_f64(f64);
+
+f64 math_ceil_f64(f64);
+
+f64 math_round_f64(f64);
