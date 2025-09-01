@@ -57,13 +57,22 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: setup-msvc
+              if: matrix.config.toolchain == 'msvc'
+              uses: microsoft/setup-msbuild@v2
+
             - name: test-unix
               if: matrix.config.toolchain == 'unix'
               run: cmake -B build && cd build && make -k test
 
             - name: test-msvc
               if: matrix.config.toolchain == 'msvc'
-              run: ./scripts/msvc-env.ps1 && cmake -B build -G 'NMake Makefiles' && cd build && nmake /C /K test
+              shell: cmd
+              run: |
+                  call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+                  cmake -B build -G "NMake Makefiles"
+                  cd build
+                  nmake /C /K test
 
             - name: test-mingw
               if: matrix.config.toolchain == 'mingw'
