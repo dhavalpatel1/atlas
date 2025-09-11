@@ -1,5 +1,8 @@
+#include "cli_app.h"
 #include "core_diag.h"
 #include "core_dynarray.h"
+#include "core_format.h"
+#include "core_sentinel.h"
 #include "core_string.h"
 #include "core_types.h"
 
@@ -59,10 +62,25 @@ static void cli_parse_set_provided(CliParseCtx* ctx, CliId id) {
     dynarray_at_t(&ctx->options, id, CliInvocationOption)->provided = true;
 }
 
-static void cli_parse_add_value(CliParseCtx* ctx, const CliId id, const String value) {
+static void cli_parse_add_value(CliParseCtx* ctx, const CliId id, const CliOptionFlags flags, String value) {
     CliInvocationOption* opt = dynarray_at_t(&ctx->options, id, CliInvocationOption);
 
-    *dynarray_push_t(&opt->values, String) = value;
+    if ((flags & CliOptionFlags_MultiValue) == CliOptionFlags_MultiValue) {
+        usize commaPos;
+        while (!sentinel_check(commaPos = string_find_first(value, string_lit(",")))) {
+            const String partBeforeComma = string_slice(value, 0, commaPos);
+
+            if (LIKELY(!string_is_empty(partBeforeComma))) {
+                *dynarray_push_t(&opt->values, String) = partBeforeComma;
+            }
+
+            value = string_consume(value, commaPos + 1);
+        }
+    }
+
+    if (LIKELY(!string_is_empty(value))) {
+        *dynarray_push_t(&opt->values, String) = value;
+    }
 }
 
 static void cli_parse_add_values(CliParseCtx* ctx, CliId optId) {
@@ -81,7 +99,7 @@ static void cli_parse_add_values(CliParseCtx* ctx, CliId optId) {
         return;
     }
 
-    cli_parse_add_value(ctx, optId, cli_parse_peek_arg(ctx));
+    cli_parse_add_value(ctx, optId, flags, cli_parse_peek_arg(ctx));
     cli_parse_consume_arg(ctx);
 
     const bool multiValue = (flags & CliOptionFlags_MultiValue) == CliOptionFlags_MultiValue;
@@ -96,7 +114,7 @@ static void cli_parse_add_values(CliParseCtx* ctx, CliId optId) {
             break;
         }
 
-        cli_parse_add_value(ctx, optId, cli_parse_peek_arg(ctx));
+        cli_parse_add_value(ctx, optId, flags, cli_parse_peek_arg(ctx));
         cli_parse_consume_arg(ctx);
     }
 }
@@ -160,10 +178,10 @@ static void cli_parse_arg(CliParseCtx* ctx) {
     if (sentinel_check(optId)) {
         cli_parse_add_error(ctx, fmt_write_scratch("Invalid input '{}'", fmt_text(cli_parse_peek_arg(ctx))));
         cli_parse_consume_arg(ctx);
-        
+
         return;
     }
-    
+
     ++ctx->nextPositional;
 
     cli_parse_set_provided(ctx, optId);
@@ -242,13 +260,30 @@ static void cli_parse_check_exclusions(CliParseCtx* ctx) {
     });
 }
 
+static void cli_parse_validate_required_option(CliParseCtx* ctx, const CliId optId) {
+    CliOption* opt =  cli_option(ctx->app, optId);
+
+    const bool isRequired = (opt->flags & CliOptionFlags_Required) == CliOptionFlags_Required;
+    if (!isRequired || cli_parse_already_provided(ctx, optId)) {
+        return;
+    }
+
+    dynarray_for_t((DynArray*)&ctx->app->exclusions, CliExclusion, ex, {
+        if (ex->a == optId && cli_parse_already_provided(ctx, ex->b)) {
+            return;
+        }
+
+        if (ex->b == optId && cli_parse_already_provided(ctx, ex->a)) {
+            return;
+        }
+    });
+
+    cli_parse_add_error(ctx, fmt_write_scratch("Required option '{}' was not provided", fmt_text(cli_option_name(ctx->app, optId))));
+}
+
 static void cli_parse_validate_required_options(CliParseCtx* ctx) {
     for (CliId optId = 0; optId != ctx->options.size; ++optId) {
-        CliOption* opt = cli_option(ctx->app, optId);
-        const bool isRequired = (opt->flags & CliOptionFlags_Required) == CliOptionFlags_Required;
-        if (isRequired && !cli_parse_already_provided(ctx, optId)) {
-            cli_parse_add_error(ctx, fmt_write_scratch("Required option '{}' was not provided", fmt_text(cli_option_name(ctx->app, optId))));
-        }
+        cli_parse_validate_required_option(ctx, optId);
     }
 }
 
@@ -298,23 +333,23 @@ void cli_parse_destroy(CliInvocation* invoc) {
     alloc_free_t(invoc->alloc, invoc);
 }
 
-CliParseResult cli_parse_result(CliInvocation* invoc) {
+CliParseResult cli_parse_result(const CliInvocation* invoc) {
     return invoc->errors.size ? CliParseResult_Fail : CliParseResult_Success;
 }
 
-CliParseErrors cli_parse_errors(CliInvocation* invoc) {
+CliParseErrors cli_parse_errors(const CliInvocation* invoc) {
     return (CliParseErrors) {
         .head = invoc->errors.size ? dynarray_at_t(&invoc->errors, 0, String) : null,
         .count = invoc->errors.size,
     };
 }
 
-bool cli_parse_provided(CliInvocation* invoc, CliId id) {
-    return cli_invocation_option(invoc, id)->provided;
+bool cli_parse_provided(const CliInvocation* invoc, CliId id) {
+    return cli_invocation_option((CliInvocation*)invoc, id)->provided;
 }
 
-CliParseValues cli_parse_values(CliInvocation* invoc, CliId id) {
-    const CliInvocationOption* opt = cli_invocation_option(invoc, id);
+CliParseValues cli_parse_values(const CliInvocation* invoc, CliId id) {
+    const CliInvocationOption* opt = cli_invocation_option((CliInvocation*)invoc, id);
 
     return (CliParseValues) {
         .head = opt->values.size ? dynarray_at_t(&opt->values, 0, String) : null,

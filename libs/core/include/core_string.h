@@ -56,3 +56,7 @@ usize string_find_last(String string, String subStr);
 usize string_find_last_any(String string, String chars);
 
 bool string_match_glob(String string, String pattern, StringMatchFlags flags);
+
+String string_trim(String, String chars);
+
+String string_trim_whitespace(String);

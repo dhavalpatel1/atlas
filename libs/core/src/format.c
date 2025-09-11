@@ -391,6 +391,7 @@ void format_write_bitset(DynString *dynstr, BitSet val) {
 }
 
 void format_write_mem(DynString *dynstr, Mem val) {
+    diag_assert_msg(val.size <= usize_gibibyte, "Mem value too big: '{}'", fmt_size(val.size));
     for (usize i = val.size; i-- != 0; ) {
         format_write_int(dynstr, *mem_at_u8(val, i), .minDigits = 2, .base = 16);
     }
@@ -508,11 +509,13 @@ void format_write_size_pretty(DynString* dynstr, const usize val) {
 }
 
 void format_write_text(DynString *dynstr, String val, const FormatOptsText *opts) {
+    diag_assert_msg(val.size <= usize_gibibyte, "Text too big: '{}'", fmt_size(val.size));
     mem_for_u8(val, byte, { format_write_char(dynstr, byte, opts); });
 }
 
 void format_write_text_wrapped(DynString* dynstr, String val, usize maxWidth, String linePrefix) {
     diag_assert_msg(maxWidth, "'maxWidth' of zero is not supported");
+    diag_assert_msg(val.size <= usize_gibibyte, "Test too big: '{}'", fmt_size(val.size));
 
     usize column = 0;
     while (true) {

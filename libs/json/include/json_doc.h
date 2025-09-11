@@ -42,6 +42,8 @@ typedef struct {
         }                                                                                          \
     }
 
+#define json_add_string_lit(_DOC_, _STRING_LIT_) json_add_string(_DOC_, string_lit(_STRING_LIT_))
+
 JsonDoc* json_create(Allocator* allocator, usize valueCapacity);
 
 void json_destroy(JsonDoc* doc);

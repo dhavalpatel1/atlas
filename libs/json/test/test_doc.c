@@ -9,7 +9,7 @@ spec(doc) {
     setup() { doc = json_create(g_alloc_heap, 0); }
 
     it("can retrieve the value of a string") {
-        const JsonVal str = json_add_string(doc, string_lit("Hello World"));
+        const JsonVal str = json_add_string_lit(doc, "Hello World");
 
         anvil_eq_int(json_type(doc, str), JsonType_String);
         anvil_eq_string(json_string(doc, str), string_lit("Hello World"));
@@ -52,7 +52,7 @@ spec(doc) {
 
     it("can store arrays with a single element") {
         const JsonVal val  = json_add_array(doc);
-        const JsonVal elem = json_add_string(doc, string_lit("Hello World"));
+        const JsonVal elem = json_add_string_lit(doc, "Hello World");
 
         anvil_eq_int(json_parent(doc, elem), JsonParent_None);
 
@@ -69,7 +69,7 @@ spec(doc) {
     it("can lookup array elements by index") {
         const JsonVal val = json_add_array(doc);
 
-        const JsonVal elemVal1 = json_add_string(doc, string_lit("Hello"));
+        const JsonVal elemVal1 = json_add_string_lit(doc, "Hello");
         const JsonVal elemVal2 = json_add_bool(doc, true);
         const JsonVal elemVal3 = json_add_null(doc);
 
@@ -87,7 +87,7 @@ spec(doc) {
     it("can iterate array elements") {
         const JsonVal val = json_add_array(doc);
 
-        json_add_elem(doc, val, json_add_string(doc, string_lit("Hello World")));
+        json_add_elem(doc, val, json_add_string_lit(doc, "Hello World"));
         json_add_elem(doc, val, json_add_bool(doc, true));
         json_add_elem(doc, val, json_add_null(doc));
 
@@ -123,7 +123,7 @@ spec(doc) {
 
     it("can store objects with a single field") {
         const JsonVal val   = json_add_object(doc);
-        const JsonVal field = json_add_string(doc, string_lit("Hello World"));
+        const JsonVal field = json_add_string_lit(doc, "Hello World");
 
         anvil_eq_int(json_parent(doc, field), JsonParent_None);
 
@@ -143,7 +143,7 @@ spec(doc) {
     it("can lookup object fields by name") {
         const JsonVal val = json_add_object(doc);
 
-        const JsonVal fieldVal1 = json_add_string(doc, string_lit("Hello"));
+        const JsonVal fieldVal1 = json_add_string_lit(doc, "Hello");
         const JsonVal fieldVal2 = json_add_bool(doc, true);
         const JsonVal fieldVal3 = json_add_null(doc);
 
@@ -162,7 +162,7 @@ spec(doc) {
         const JsonVal val = json_add_object(doc);
 
         bool res = true;
-        res &= json_add_field_str(doc, val, string_lit("a"), json_add_string(doc, string_lit("Hello")));
+        res &= json_add_field_str(doc, val, string_lit("a"), json_add_string_lit(doc, "Hello"));
         res &= json_add_field_str(doc, val, string_lit("b"), json_add_bool(doc, true));
         res &= json_add_field_str(doc, val, string_lit("c"), json_add_null(doc));
         anvil(res);
@@ -202,7 +202,7 @@ spec(doc) {
     it("can store complex structures") {
         const JsonVal obj1 = json_add_object(doc);
         json_add_field_str(doc, obj1, string_lit("a"), json_add_null(doc));
-        json_add_field_str(doc, obj1, string_lit("b"), json_add_string(doc, string_lit("Hello")));
+        json_add_field_str(doc, obj1, string_lit("b"), json_add_string_lit(doc, "Hello"));
 
         const JsonVal arr = json_add_array(doc);
         json_add_elem(doc, arr, json_add_bool(doc, true));

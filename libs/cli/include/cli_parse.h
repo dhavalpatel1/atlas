@@ -28,10 +28,10 @@ CliInvocation* cli_parse(const CliApp*, int argc, const char** argv);
 
 void cli_parse_destroy(CliInvocation*);
 
-CliParseResult cli_parse_result(CliInvocation*);
+CliParseResult cli_parse_result(const CliInvocation*);
 
-CliParseErrors cli_parse_errors(CliInvocation*);
+CliParseErrors cli_parse_errors(const CliInvocation*);
 
-bool cli_parse_provided(CliInvocation*, CliId);
+bool cli_parse_provided(const CliInvocation*, CliId);
 
-CliParseValues cli_parse_values(CliInvocation*, CliId);
+CliParseValues cli_parse_values(const CliInvocation*, CliId);
